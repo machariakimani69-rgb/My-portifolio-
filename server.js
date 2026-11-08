@@ -56,6 +56,28 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
+const corsAllowedOrigins = new Set((process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+  .map((origin) => {
+    let parsed;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      throw new Error(`CORS_ALLOWED_ORIGINS contains an invalid origin: ${origin}`);
+    }
+    if (!['http:', 'https:'].includes(parsed.protocol)
+      || parsed.origin !== origin
+      || parsed.username
+      || parsed.password
+      || parsed.pathname !== '/'
+      || parsed.search
+      || parsed.hash) {
+      throw new Error(`CORS_ALLOWED_ORIGINS must contain only exact HTTP(S) origins: ${origin}`);
+    }
+    return parsed.origin;
+  }));
 
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   console.error('PORT must be an integer between 1 and 65535.');
@@ -319,19 +341,34 @@ function requestHost(request) {
   return (forwardedHost || request.headers.host || '').toLowerCase();
 }
 
+function allowedCorsOrigin(request) {
+  const origin = request.headers.origin;
+  if (typeof origin !== 'string') return null;
+  try {
+    const parsedOrigin = new URL(origin);
+    return corsAllowedOrigins.has(parsedOrigin.origin) ? parsedOrigin.origin : null;
+  } catch {
+    return null;
+  }
+}
+
 function hasSameOrigin(request) {
   const origin = request.headers.origin;
   if (!origin) {
     const referer = request.headers.referer;
     if (!referer) return false;
     try {
-      return new URL(referer).host.toLowerCase() === requestHost(request);
+      const parsedReferer = new URL(referer);
+      return parsedReferer.host.toLowerCase() === requestHost(request)
+        || corsAllowedOrigins.has(parsedReferer.origin);
     } catch {
       return false;
     }
   }
   try {
-    return new URL(origin).host.toLowerCase() === requestHost(request);
+    const parsedOrigin = new URL(origin);
+    return parsedOrigin.host.toLowerCase() === requestHost(request)
+      || corsAllowedOrigins.has(parsedOrigin.origin);
   } catch {
     return false;
   }
@@ -1084,6 +1121,62 @@ async function handlePrivateBlobUpload(request, response) {
 async function handleRequest(request, response) {
   const requestUrl = new URL(request.url || '/', 'http://localhost');
   const pathname = requestUrl.pathname;
+
+  if (pathname.startsWith('/api/')) {
+    const origin = allowedCorsOrigin(request);
+    if (origin) {
+      response.setHeader('Access-Control-Allow-Origin', origin);
+      response.setHeader('Access-Control-Allow-Credentials', 'true');
+      response.setHeader('Vary', 'Origin');
+    }
+
+    if (request.method === 'OPTIONS') {
+      const requestedMethod = request.headers['access-control-request-method'];
+      const requestedHeaders = (request.headers['access-control-request-headers'] || '')
+        .split(',')
+        .map((header) => header.trim().toLowerCase())
+        .filter(Boolean);
+      const allowedMethods = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'];
+      const allowedHeaders = new Set(['accept', 'content-type']);
+      if (!origin
+        || !allowedMethods.includes(requestedMethod)
+        || requestedHeaders.some((header) => !allowedHeaders.has(header))) {
+        return sendJson(response, 403, { error: 'Request origin or preflight headers are not allowed.' });
+      }
+      response.writeHead(204, {
+        ...securityHeaders(),
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Methods': `${allowedMethods.join(', ')}, OPTIONS`,
+        'Access-Control-Allow-Headers': 'Accept, Content-Type',
+        'Access-Control-Max-Age': '600',
+        Vary: 'Origin',
+      });
+      return response.end();
+    }
+  }
+
+  if (request.method === 'GET' && pathname === '/api/health') {
+    const startedAt = Date.now();
+    try {
+      await database.getAdminPasswordHash();
+      return sendJson(response, 200, {
+        status: 'ok',
+        database: {
+          status: 'ok',
+          provider: database.isRemoteDatabase ? 'turso-libsql' : 'sqlite',
+        },
+        responseTimeMs: Date.now() - startedAt,
+      });
+    } catch (error) {
+      console.error('Health check could not reach the database:', error);
+      return sendJson(response, 503, {
+        status: 'error',
+        database: { status: 'error' },
+        responseTimeMs: Date.now() - startedAt,
+      });
+    }
+  }
 
   if (request.method === 'GET' && pathname === '/api/portfolio') {
     const session = await visitorSessionFromRequest(request);
@@ -1877,10 +1970,11 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === 'POST' && pathname === '/api/admin/uploads') {
-      if (isProduction) {
+      if (isProduction && !process.env.BLOB_READ_WRITE_TOKEN) {
         return sendJson(response, 503, { error: 'Persistent upload storage is not configured.' });
       }
       let uploadPath;
+      let blobPath;
       try {
         const payload = await readJson(request, MAX_UPLOAD_BODY_BYTES);
         if (typeof payload?.content !== 'string' || payload.content.length > Math.ceil(MAX_UPLOAD_BYTES / 3) * 4 + 8
@@ -1899,15 +1993,25 @@ async function handleRequest(request, response) {
         const fileName = `${id}.${detected.extension}`;
         const originalName = safeOriginalName(payload.fileName);
         if (!originalName) return sendJson(response, 400, { error: 'A file name is required.' });
-        fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-        uploadPath = path.join(UPLOADS_DIR, fileName);
-        fs.writeFileSync(uploadPath, buffer, { flag: 'wx', mode: 0o644 });
+        if (process.env.BLOB_READ_WRITE_TOKEN) {
+          const blob = await putBlob(fileName, buffer, {
+            access: 'private',
+            addRandomSuffix: false,
+            contentType: detected.type,
+          });
+          blobPath = blob.pathname;
+        } else {
+          fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+          uploadPath = path.join(UPLOADS_DIR, fileName);
+          fs.writeFileSync(uploadPath, buffer, { flag: 'wx', mode: 0o644 });
+        }
         await database.addPortfolioUpload({
           id,
           originalName,
           contentType: detected.type,
           fileSize: buffer.length,
           uploadedAt: new Date().toISOString(),
+          ...(blobPath ? { blobPath } : {}),
         });
         return sendJson(response, 201, {
           id,
@@ -1918,6 +2022,13 @@ async function handleRequest(request, response) {
         });
       } catch (error) {
         if (uploadPath) fs.rmSync(uploadPath, { force: true });
+        if (blobPath) {
+          try {
+            await deleteBlob(blobPath);
+          } catch (cleanupError) {
+            console.error('Uploaded portfolio file could not be removed after a database error:', cleanupError);
+          }
+        }
         if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
           return sendJson(response, 400, { error: error.message });
         }

@@ -213,7 +213,7 @@ const renderPortfolio = (data) => {
 	if (window.lucide?.createIcons) window.lucide.createIcons();
 };
 
-fetch('/api/portfolio', { cache: 'no-store' })
+window.portfolioApiFetch('/api/portfolio', { cache: 'no-store' })
 	.then((response) => (response.ok ? response.json() : null))
 	.then(renderPortfolio)
 	.catch(() => {});

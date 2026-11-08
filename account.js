@@ -44,8 +44,7 @@ function showMessage(element, message, success = false) {
 }
 
 async function accountRequest(path, options = {}) {
-  const response = await fetch(path, {
-    credentials: 'same-origin',
+  const response = await window.portfolioApiFetch(path, {
     cache: 'no-store',
     ...options,
     headers: {

@@ -105,9 +105,8 @@ function sendAnalytics(eventType, label = '') {
   if (!hasAnalyticsConsent() || !analyticsReady) return;
   const sessionId = analyticsSessionId();
   if (!sessionId) return;
-  fetch('/api/analytics/event', {
+  window.portfolioApiFetch('/api/analytics/event', {
     method: 'POST',
-    credentials: 'same-origin',
     keepalive: true,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -136,9 +135,8 @@ async function enableAnalytics() {
   const visitorId = analyticsVisitorId();
   if (!visitorId) return false;
   try {
-    const response = await fetch('/api/analytics/consent', {
+    const response = await window.portfolioApiFetch('/api/analytics/consent', {
       method: 'POST',
-      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visitorId }),
     });
@@ -208,7 +206,7 @@ function addProfileEngagement() {
   likeButton.setAttribute('aria-pressed', String(liked));
   likeButton.querySelector('span').textContent = liked ? 'Liked' : 'Like profile';
 
-  fetch('/api/analytics/like-count', { cache: 'no-store' })
+  window.portfolioApiFetch('/api/analytics/like-count', { cache: 'no-store' })
     .then((response) => response.ok ? response.json() : null)
     .then((data) => { if (data) likeCount.textContent = String(data.likes); })
     .catch(() => {});
@@ -227,9 +225,8 @@ function addProfileEngagement() {
     } catch {
       showFeatureToast('Like saved for this visit only.');
     }
-    fetch('/api/analytics/like', {
+    window.portfolioApiFetch('/api/analytics/like', {
       method: 'POST',
-      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ liked, clientId }),
     })
@@ -357,8 +354,7 @@ function addLiveVisitorBadge() {
 
   const refresh = async () => {
     try {
-      const response = await fetch('/api/analytics/live-visitors', {
-        credentials: 'same-origin',
+      const response = await window.portfolioApiFetch('/api/analytics/live-visitors', {
         cache: 'no-store',
       });
       const result = await response.json().catch(() => ({}));
@@ -667,9 +663,8 @@ function addContactActions() {
       const button = form.querySelector('button[type="submit"]');
       button.disabled = true;
       try {
-        const response = await fetch('/api/contact', {
+        const response = await window.portfolioApiFetch('/api/contact', {
           method: 'POST',
-          credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: values.get('name'),
@@ -723,9 +718,8 @@ function addPageUtilities() {
         localStorage.setItem(analyticsConsentKey, 'declined');
         analyticsReady = false;
         window.clearInterval(analyticsHeartbeat);
-        const response = await fetch('/api/analytics/consent/revoke', {
+        const response = await window.portfolioApiFetch('/api/analytics/consent/revoke', {
           method: 'POST',
-          credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body: '{}',
         });
@@ -907,7 +901,7 @@ function downloadFile(fileName, contents, type = 'text/markdown;charset=utf-8') 
 
 function addLocalPortfolioTools() {
   const pageKey = currentPageKey();
-  fetch(`/api/site?page=${encodeURIComponent(pageKey)}`, { credentials: 'same-origin', cache: 'no-store' })
+  window.portfolioApiFetch(`/api/site?page=${encodeURIComponent(pageKey)}`, { cache: 'no-store' })
     .then(async (response) => {
       if (!response.ok) {
         if (response.status !== 401) throw new Error('Portfolio tools could not be loaded.');
@@ -995,9 +989,8 @@ function addLocalPortfolioTools() {
           button.addEventListener('click', async () => {
             button.disabled = true;
             try {
-              const response = await fetch('/api/community/follow', {
+              const response = await window.portfolioApiFetch('/api/community/follow', {
                 method: 'POST',
-                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ following: button.getAttribute('aria-pressed') !== 'true' }),
               });
@@ -1059,9 +1052,8 @@ function addLocalPortfolioTools() {
             event.preventDefault();
             submit.disabled = true;
             try {
-              const response = await fetch('/api/community/comment', {
+              const response = await window.portfolioApiFetch('/api/community/comment', {
                 method: 'POST',
-                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pageKey, message: textarea.value }),
               });
@@ -1123,9 +1115,8 @@ function addLocalPortfolioTools() {
             event.preventDefault();
             submit.disabled = true;
             try {
-              const response = await fetch('/api/community/contact', {
+              const response = await window.portfolioApiFetch('/api/community/contact', {
                 method: 'POST',
-                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email.value, message: textarea.value }),
               });

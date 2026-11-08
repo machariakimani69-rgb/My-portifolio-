@@ -75,8 +75,7 @@ async function apiRequest(url, options = {}) {
 
   let response;
   try {
-    response = await fetch(url, {
-      credentials: 'same-origin',
+    response = await window.portfolioApiFetch(url, {
       cache: 'no-store',
       ...options,
       headers: {
@@ -538,7 +537,7 @@ function renderExtensions(data) {
   data.uploads.forEach((upload) => {
     const item = document.createElement('li');
     const link = document.createElement('a');
-    link.href = `/uploads/${upload.id}.${({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' })[upload.contentType]}`;
+    link.href = window.portfolioApiUrl(`/uploads/${upload.id}.${({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' })[upload.contentType]}`);
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.textContent = `${upload.originalName} · ${formatBytes(upload.fileSize)}`;
@@ -1041,8 +1040,7 @@ async function exportAnalytics(format, button) {
   setMessage(message, `Preparing ${format.toUpperCase()} analytics report…`);
   try {
     const extension = format === 'json' ? '' : `.${format}`;
-    const response = await fetch(`/api/admin/analytics/export${extension}${selectedAnalyticsQuery()}`, {
-      credentials: 'same-origin',
+    const response = await window.portfolioApiFetch(`/api/admin/analytics/export${extension}${selectedAnalyticsQuery()}`, {
       cache: 'no-store',
     });
     if (!response.ok) {

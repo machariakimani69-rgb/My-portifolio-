@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: david-kimani-portfolio
+    runtime: node
+    repo: https://github.com/machariakimani69-rgb/My-portifolio-
+    branch: main
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: "0.0.0.0"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
