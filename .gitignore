@@ -1,0 +1,17 @@
+.env
+.env.local
+.vercel/
+dist/
+node_modules/
+*.sqlite
+*.sqlite3
+*.db
+npm-debug.log*
+data/analytics.json
+data/visitor-accounts.json
+data/portfolio.db
+data/portfolio.db-shm
+data/portfolio.db-wal
+data/portfolio.draft.json
+data/portfolio-revisions/
+uploads/

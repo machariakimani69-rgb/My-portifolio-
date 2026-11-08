@@ -1,0 +1,56 @@
+{
+  "name": "David Macharia Kimani",
+  "tagline": "Software Engineer · Computer Science Student",
+  "intro": "I’m a software engineer pursuing Computer Science at the University of Embu. I build responsive, user-friendly web experiences and enjoy exploring how thoughtful code and design can solve everyday problems.",
+  "aboutHeading": "Building useful digital experiences, one project at a time.",
+  "aboutParagraphs": [
+    "I’m a software engineer pursuing a BSc in Computer Science at the University of Embu (2024–2028). I’m deepening my foundation in programming, computational thinking, and problem-solving while turning ideas into useful digital experiences.",
+    "My current focus is frontend development: using HTML, CSS, and JavaScript to create responsive, accessible interfaces. I’m keen to keep learning and apply my skills through hands-on projects.",
+    "Coding and athletics are two of my favorite interests. Athletics helps me practice discipline, consistency, and focus, while coding lets me explore ideas and build useful things."
+  ],
+  "skills": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Responsive Design",
+    "UI/UX Basics",
+    "Git & GitHub",
+    "Web Development"
+  ],
+  "focus": [
+    {
+      "title": "Computer Science",
+      "icon": "cpu",
+      "description": "Developing a strong foundation in programming, computational thinking, and practical problem-solving."
+    },
+    {
+      "title": "Frontend Development",
+      "icon": "panels-top-left",
+      "description": "Building responsive, accessible interfaces with HTML, CSS, and JavaScript."
+    },
+    {
+      "title": "Athletic Mindset",
+      "icon": "activity",
+      "description": "Bringing discipline, consistency, and a drive to improve to both study and project work."
+    }
+  ],
+  "education": [
+    {
+      "period": "2024–2028",
+      "title": "BSc in Computer Science",
+      "description": "University of Embu (UoEm) · Currently pursuing"
+    },
+    {
+      "period": "Completed 2023",
+      "title": "Secondary Education",
+      "description": "Mwihangia Mixed Day Secondary School · Grade B+"
+    },
+    {
+      "period": "Completed 2017",
+      "title": "Primary Education",
+      "description": "Mwihangia Primary School · 299 marks"
+    }
+  ],
+  "projects": [],
+  "contacts": []
+}

@@ -1,0 +1,26 @@
+{
+  "name": "david-kimani-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio with a protected content admin panel",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "build": "node scripts/build.js",
+    "migrate:vercel": "node scripts/migrate-vercel.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.15.15",
+    "@vercel/blob": "^2.3.0",
+    "bcryptjs": "^3.0.3",
+    "chart.js": "^4.5.1",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

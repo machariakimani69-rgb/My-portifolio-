@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" role="img" aria-labelledby="title description">
+  <title id="title">Coding ideas into software</title>
+  <desc id="description">Original vector artwork showing a software developer sketching an idea and working at a laptop with code on screen.</desc>
+  <rect width="960" height="620" fill="#e6efe8"/>
+  <path d="M0 472h960v148H0z" fill="#ceded2"/>
+  <circle cx="792" cy="132" r="76" fill="#f2c77f"/>
+  <path d="M109 126h279v211H109z" fill="#fffdf9" stroke="#376354" stroke-width="8"/>
+  <path d="M132 153h233M132 180h175M132 207h212M132 234h140" stroke="#a1b9a7" stroke-width="8" stroke-linecap="round"/>
+  <path d="M132 276h64M217 276h120" stroke="#e18a68" stroke-width="8" stroke-linecap="round"/>
+  <path d="M305 333h407l-38 32H342z" fill="#315b4a"/>
+  <rect x="360" y="210" width="306" height="204" rx="12" fill="#fffdf9" stroke="#315b4a" stroke-width="9"/>
+  <rect x="380" y="230" width="266" height="160" rx="5" fill="#1e382f"/>
+  <path d="M404 262h78M404 289h150M404 316h54M404 343h113" stroke="#91d9b5" stroke-width="8" stroke-linecap="round"/>
+  <path d="M404 369h78" stroke="#e18a68" stroke-width="8" stroke-linecap="round"/>
+  <path d="M177 429h603" stroke="#604839" stroke-width="24" stroke-linecap="round"/>
+  <path d="M228 452v92M730 452v92" stroke="#604839" stroke-width="17" stroke-linecap="round"/>
+  <path d="M149 406c16-22 43-35 70-35h40l20 57H122z" fill="#e18a68"/>
+  <circle cx="227" cy="340" r="43" fill="#8b543c"/>
+  <path d="M185 337c1-40 31-62 67-51 23 7 34 26 30 51-22-2-38-13-47-31-11 19-28 30-50 31" fill="#263b32"/>
+  <path d="M191 367c15 15 43 18 63 1" fill="none" stroke="#54382a" stroke-width="6" stroke-linecap="round"/>
+  <path d="M703 367h97" stroke="#315b4a" stroke-width="9" stroke-linecap="round"/>
+  <path d="M751 330v37" stroke="#315b4a" stroke-width="9" stroke-linecap="round"/>
+</svg>

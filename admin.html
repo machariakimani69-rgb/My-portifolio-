@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="Private portfolio content administration." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="admin.css" />
+    <title>Portfolio Admin | David Macharia Kimani</title>
+  </head>
+  <body>
+    <main class="login-shell" id="loginView">
+      <form class="login-form" id="loginForm">
+        <a class="login-brand" href="/" aria-label="Portfolio home">DMK<span>.</span></a>
+        <p class="eyebrow">Private workspace</p>
+        <h1>Admin sign in</h1>
+        <p class="muted">Sign in to manage your portfolio content.</p>
+        <label for="adminPassword">Admin password</label>
+        <div class="password-field">
+          <input id="adminPassword" name="password" type="password" autocomplete="current-password" required minlength="12" />
+          <button class="icon-button password-toggle" id="passwordToggle" type="button" aria-label="Show password" title="Show password" aria-pressed="false">
+            <i data-lucide="eye" aria-hidden="true"></i>
+          </button>
+        </div>
+        <button class="button button-primary login-submit" type="submit">
+          <span>Sign in</span>
+          <i data-lucide="arrow-right" aria-hidden="true"></i>
+        </button>
+        <p class="form-message" id="loginMessage" role="status" aria-live="polite"></p>
+        <a class="back-link" href="#forgot-password" id="forgotPasswordLink">Forgot Password?</a>
+        <a class="back-link" href="account.html">Visitor? Sign in or create an account</a>
+        <a class="back-link" href="/">Back to portfolio</a>
+      </form>
+
+      <section class="login-form hidden" id="recoveryView" aria-labelledby="recoveryTitle">
+        <a class="login-brand" href="/" aria-label="Portfolio home">DMK<span>.</span></a>
+        <p class="eyebrow">Account recovery</p>
+        <h1 id="recoveryTitle">Reset admin password</h1>
+        <p class="muted">Enter the recovery key configured by the site owner. Email reset is not available on this site.</p>
+        <form id="forgotPasswordForm">
+          <label for="adminRecoveryKey">Recovery key</label>
+          <input id="adminRecoveryKey" name="recoveryKey" type="password" autocomplete="off" required maxlength="256" />
+          <button class="button button-primary login-submit" type="submit">Verify recovery key</button>
+          <p class="form-message" id="recoveryMessage" role="status" aria-live="polite"></p>
+        </form>
+        <a class="back-link" href="#sign-in" id="recoveryBackLink">Back to sign in</a>
+      </section>
+
+      <section class="login-form hidden" id="resetPasswordView" aria-labelledby="resetPasswordTitle">
+        <a class="login-brand" href="/" aria-label="Portfolio home">DMK<span>.</span></a>
+        <p class="eyebrow">Account recovery</p>
+        <h1 id="resetPasswordTitle">Choose a new password</h1>
+        <p class="muted">Use at least 12 characters. The reset token expires after 15 minutes.</p>
+        <form id="resetPasswordForm" autocomplete="off">
+          <label for="adminNewPassword">New password</label>
+          <input id="adminNewPassword" name="newPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="72" />
+          <label for="adminConfirmPassword">Confirm new password</label>
+          <input id="adminConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="72" />
+          <button class="button button-primary login-submit" type="submit">Reset password</button>
+          <p class="form-message" id="resetPasswordMessage" role="status" aria-live="polite"></p>
+        </form>
+        <a class="back-link" href="#sign-in" id="resetBackLink">Back to sign in</a>
+      </section>
+    </main>
+
+    <div class="admin-app hidden" id="adminApp">
+      <header class="admin-header">
+        <a class="admin-brand" href="/" aria-label="Open portfolio">DMK<span>.</span><b>PORTFOLIO</b></a>
+        <div class="header-actions">
+          <span class="save-status" id="saveStatus" role="status" aria-live="polite">All changes saved</span>
+          <a class="icon-button" href="/" aria-label="View portfolio" title="View portfolio"><i data-lucide="external-link" aria-hidden="true"></i></a>
+          <button class="icon-button" id="logoutButton" type="button" aria-label="Sign out" title="Sign out"><i data-lucide="log-out" aria-hidden="true"></i></button>
+        </div>
+      </header>
+
+      <div class="admin-layout">
+        <aside class="sidebar">
+          <p class="sidebar-label">WORKSPACE</p>
+          <nav class="admin-tabs" aria-label="Admin sections">
+            <button class="admin-tab active" type="button" data-tab="dashboard"><i data-lucide="layout-dashboard" aria-hidden="true"></i>Dashboard</button>
+            <p class="sidebar-label sidebar-group-label">PORTFOLIO</p>
+            <button class="admin-tab" type="button" data-tab="profile"><i data-lucide="user-round" aria-hidden="true"></i>Profile</button>
+            <button class="admin-tab" type="button" data-tab="focus"><i data-lucide="sparkles" aria-hidden="true"></i>Focus areas</button>
+            <button class="admin-tab" type="button" data-tab="education"><i data-lucide="graduation-cap" aria-hidden="true"></i>Education</button>
+            <button class="admin-tab" type="button" data-tab="projects"><i data-lucide="folder-kanban" aria-hidden="true"></i>Projects</button>
+            <button class="admin-tab" type="button" data-tab="contacts"><i data-lucide="contact-round" aria-hidden="true"></i>Social links</button>
+            <p class="sidebar-label sidebar-group-label">MANAGE</p>
+            <button class="admin-tab" type="button" data-tab="extensions"><i data-lucide="blocks" aria-hidden="true"></i>Site tools</button>
+            <button class="admin-tab" type="button" data-tab="insights"><i data-lucide="chart-no-axes-column-increasing" aria-hidden="true"></i>Analytics</button>
+            <button class="admin-tab" type="button" data-tab="security"><i data-lucide="shield-check" aria-hidden="true"></i>Security</button>
+          </nav>
+          <div class="sidebar-note"><i data-lucide="shield-check" aria-hidden="true"></i><span>Only the configured owner can access these tools.</span></div>
+        </aside>
+
+        <section class="editor-area" aria-label="Portfolio content editor">
+          <div class="editor-heading">
+            <div>
+              <p class="eyebrow">OWNER WORKSPACE</p>
+              <h1 id="editorTitle">Dashboard</h1>
+            </div>
+            <div class="editor-actions" id="editorActions">
+              <button class="button button-secondary" id="previewButton" type="button"><i data-lucide="eye" aria-hidden="true"></i>Preview</button>
+              <button class="button button-secondary" id="revisionsButton" type="button"><i data-lucide="history" aria-hidden="true"></i>History</button>
+              <button class="button button-secondary" id="saveButton" type="button"><i data-lucide="save" aria-hidden="true"></i>Save draft</button>
+              <button class="button button-primary" id="publishButton" type="button"><i data-lucide="send" aria-hidden="true"></i>Publish</button>
+            </div>
+          </div>
+          <p class="form-message editor-message" id="editorMessage" role="status" aria-live="polite"></p>
+
+          <section class="tab-panel dashboard-panel active" data-panel="dashboard">
+            <div class="dashboard-welcome">
+              <div><h2>Portfolio overview</h2><p>Manage your published content and review privacy-conscious activity.</p></div>
+              <span class="status-pill" id="serverStatus"><i data-lucide="activity" aria-hidden="true"></i>Checking server…</span>
+            </div>
+            <div class="dashboard-metrics">
+              <article><span>Opt-in page views</span><strong id="dashboardPageViews">—</strong><small>Aggregate events only</small></article>
+              <article><span>Profile likes</span><strong id="dashboardLikes">—</strong><small>Recorded like actions</small></article>
+              <article><span>Registered accounts</span><strong id="dashboardAccounts">—</strong><small>Count only; no details shown</small></article>
+              <article><span>Published projects</span><strong id="dashboardProjects">—</strong><small>Current portfolio content</small></article>
+            </div>
+            <div class="dashboard-columns">
+              <section class="dashboard-card">
+                <div class="card-heading"><div><h2>System health</h2><p>Live checks from this server</p></div><button class="icon-button" id="refreshDashboard" type="button" aria-label="Refresh dashboard" title="Refresh dashboard"><i data-lucide="refresh-cw" aria-hidden="true"></i></button></div>
+                <dl class="health-list">
+                  <div><dt>Application</dt><dd id="healthServer">Checking…</dd></div>
+                  <div><dt>Database integrity</dt><dd id="healthDatabase">Checking…</dd></div>
+                  <div><dt>Content storage</dt><dd id="healthContent">Checking…</dd></div>
+                  <div><dt>Admin API</dt><dd id="healthApi">Checking…</dd></div>
+                  <div><dt>API response time</dt><dd id="healthResponseTime">Checking…</dd></div>
+                  <div><dt>API errors since restart</dt><dd id="healthErrors">Checking…</dd></div>
+                  <div><dt>Failed admin logins · 365 days</dt><dd id="healthFailedLogins">Checking…</dd></div>
+                  <div><dt>Rate-limited logins · 365 days</dt><dd id="healthSuspiciousRequests">Checking…</dd></div>
+                  <div><dt>Uptime</dt><dd id="healthUptime">Checking…</dd></div>
+                </dl>
+                <p class="privacy-note" id="measurementNote"></p>
+              </section>
+              <section class="dashboard-card">
+                <div class="card-heading"><div><h2>Administrator activity</h2><p>Recent sign-ins and publishing actions</p></div></div>
+                <ol class="activity-list" id="activityList"><li>Loading activity…</li></ol>
+              </section>
+            </div>
+            <div class="dashboard-quick-links">
+              <button class="button button-secondary" type="button" data-open-tab="profile"><i data-lucide="user-round" aria-hidden="true"></i>Edit profile</button>
+              <button class="button button-secondary" type="button" data-open-tab="projects"><i data-lucide="folder-kanban" aria-hidden="true"></i>Manage projects</button>
+              <button class="button button-secondary" type="button" data-open-tab="insights"><i data-lucide="chart-no-axes-column-increasing" aria-hidden="true"></i>View analytics</button>
+            </div>
+          </section>
+
+          <form id="contentForm" autocomplete="off">
+            <section class="tab-panel active" data-panel="profile">
+              <div class="field-grid">
+                <label>Display name<input name="name" type="text" maxlength="120" required /></label>
+                <label>Hero eyebrow<input name="tagline" type="text" maxlength="160" required /></label>
+                <label class="field-wide">Introduction<textarea name="intro" rows="3" maxlength="1200" required></textarea></label>
+                <label class="field-wide">About heading<input name="aboutHeading" type="text" maxlength="300" required /></label>
+                <label class="field-wide">About paragraphs<textarea name="aboutParagraphs" rows="7" maxlength="2400" required></textarea><small>Separate paragraphs with a blank line.</small></label>
+                <label class="field-wide">Skills<textarea name="skills" rows="3" maxlength="1200" required></textarea><small>Separate skills with commas.</small></label>
+              </div>
+            </section>
+
+            <section class="tab-panel" data-panel="education" hidden>
+              <div class="panel-intro"><h2>Education history</h2><p>Update schools, qualifications, periods, and descriptions.</p></div>
+              <div class="repeat-list" id="educationList"></div>
+              <button class="button button-secondary" type="button" data-add="education"><i data-lucide="plus" aria-hidden="true"></i>Add education</button>
+            </section>
+
+            <section class="tab-panel" data-panel="focus" hidden>
+              <div class="panel-intro"><h2>What shapes your work</h2><p>Describe the interests and strengths you want visitors to notice.</p></div>
+              <div class="repeat-list" id="focusList"></div>
+              <button class="button button-secondary" type="button" data-add="focus"><i data-lucide="plus" aria-hidden="true"></i>Add focus area</button>
+            </section>
+
+            <section class="tab-panel" data-panel="projects" hidden>
+              <div class="panel-intro"><h2>Selected projects</h2><p>Keep project descriptions specific and links current.</p></div>
+              <div class="repeat-list" id="projectsList"></div>
+              <button class="button button-secondary" type="button" data-add="projects"><i data-lucide="plus" aria-hidden="true"></i>Add project</button>
+            </section>
+
+            <section class="tab-panel" data-panel="contacts" hidden>
+              <div class="panel-intro"><h2>Contact links</h2><p>Manage email, social profiles, and messaging links.</p></div>
+              <div class="repeat-list" id="contactsList"></div>
+              <button class="button button-secondary" type="button" data-add="contacts"><i data-lucide="plus" aria-hidden="true"></i>Add contact link</button>
+            </section>
+
+            <section class="tab-panel" data-panel="extensions" hidden>
+              <div class="panel-intro"><h2>Local portfolio tools</h2><p>Certificates, page SEO, and default appearance are stored locally. Email submissions are captured in this private inbox; they are not sent without an email provider.</p></div>
+              <div class="field-grid">
+                <label class="field-wide">Certificates and badges · JSON<textarea id="certificatesJson" rows="8" spellcheck="false"></textarea><small>Each item: {"title":"Certificate","issuer":"Issuer","issuedAt":"2026","url":"https://… or /uploads/…"}. Use an empty array when none.</small></label>
+                <label class="field-wide">Page SEO · JSON<textarea id="seoJson" rows="10" spellcheck="false"></textarea><small>Map page filenames to title and description, e.g. {"projects.html":{"title":"Projects","description":"Selected work"}}.</small></label>
+                <label>Accent color<input id="accentColor" type="color" value="#236653" /></label>
+                <label>Default theme<select id="defaultTheme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+              </div>
+              <div class="extensions-actions"><button class="button button-primary" id="saveExtensions" type="button"><i data-lucide="save" aria-hidden="true"></i>Save site settings</button><button class="button button-secondary" id="refreshExtensions" type="button"><i data-lucide="refresh-cw" aria-hidden="true"></i>Refresh tools</button></div>
+              <p class="form-message" id="extensionsMessage" role="status" aria-live="polite"></p>
+              <section class="extensions-section">
+                <h3>Local file uploads</h3><p class="muted">JPEG, PNG, WebP, or PDF · maximum 5 MB. Files are stored on this server and require visitor sign-in to view.</p>
+                <div class="upload-controls"><input id="uploadFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" /><button class="button button-secondary" id="uploadButton" type="button">Upload file</button></div>
+                <ul class="managed-list" id="uploadList"></ul>
+              </section>
+              <section class="extensions-section">
+                <h3>Portfolio follows</h3><p class="muted"><strong id="followCount">0</strong> visitor accounts currently follow this portfolio.</p>
+              </section>
+              <section class="extensions-section">
+                <h3>Comment moderation</h3><p class="muted">New comments remain private until approved.</p>
+                <ul class="managed-list" id="commentList"></ul>
+              </section>
+              <section class="extensions-section">
+                <h3>Local contact inbox</h3><p class="muted">Messages are stored in the local database. No email is sent automatically.</p>
+                <ul class="managed-list" id="messageList"></ul>
+              </section>
+            </section>
+
+            <section class="tab-panel" data-panel="insights" hidden>
+              <div class="panel-intro insights-heading">
+                <div><h2>Website analytics</h2><p>Only visitors who opt in are included. Random pseudonyms are not linked to account IDs; IP addresses, exact locations, and full referrer URLs are not stored. Detailed records expire after 365 days.</p></div>
+                <div class="analytics-actions"><button class="button button-secondary" id="exportAnalyticsCsv" type="button"><i data-lucide="download" aria-hidden="true"></i>CSV</button><button class="button button-secondary" id="exportAnalyticsPdf" type="button"><i data-lucide="file-text" aria-hidden="true"></i>PDF</button><button class="button button-secondary" id="exportAnalytics" type="button"><i data-lucide="braces" aria-hidden="true"></i>JSON</button><button class="button button-secondary" id="refreshInsights" type="button"><i data-lucide="refresh-cw" aria-hidden="true"></i>Refresh</button></div>
+              </div>
+              <p class="form-message" id="insightsMessage" role="status" aria-live="polite"></p>
+              <div class="analytics-filters">
+                <label>Date range
+                  <select id="analyticsRange">
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7">Last 7 days</option>
+                    <option value="last30" selected>Last 30 days</option>
+                    <option value="last90">Last 90 days</option>
+                    <option value="thisYear">This year</option>
+                    <option value="custom">Custom range</option>
+                  </select>
+                </label>
+                <label>Chart interval
+                  <select id="analyticsGranularity">
+                    <option value="daily" selected>Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </label>
+                <div class="custom-date-range hidden" id="customDateRange">
+                  <label for="analyticsFrom">From<input id="analyticsFrom" type="date" /></label>
+                  <label for="analyticsTo">To<input id="analyticsTo" type="date" /></label>
+                </div>
+                <span class="analytics-updated" id="analyticsUpdatedAt" aria-live="polite">Loading analytics…</span>
+              </div>
+              <div class="analytics-metrics">
+                <article><span>Total visits</span><strong id="analyticsTotalVisitors">—</strong></article>
+                <article><span>Unique visitors</span><strong id="analyticsUniqueVisitors">—</strong></article>
+                <article><span>Active visitors now</span><strong id="analyticsActiveVisitors">—</strong></article>
+                <article><span>Page views</span><strong id="analyticsPageViews">—</strong></article>
+                <article><span>Returning visitors</span><strong id="analyticsReturningVisitors">—</strong></article>
+                <article><span>Average session</span><strong id="analyticsDuration">—</strong></article>
+                <article><span>Bounce rate</span><strong id="analyticsBounce">—</strong></article>
+                <article><span>CV download clicks</span><strong id="analyticsCvDownloads">—</strong></article>
+                <article><span>Contact submissions</span><strong id="analyticsSubmissions">—</strong></article>
+              </div>
+              <div class="analytics-charts">
+                <section class="analytics-chart"><h3>Daily visits</h3><div class="analytics-canvas-container"><canvas id="dailyVisitorsChart" role="img" aria-label="Daily visitor and visit statistics"></canvas></div><p class="chart-empty hidden">No opted-in visits in this range.</p></section>
+                <section class="analytics-chart analytics-chart-wide"><h3>Traffic and growth trends</h3><div class="analytics-canvas-container"><canvas id="trafficTrendChart" role="img" aria-label="Portfolio visits and page views over time"></canvas></div><p class="chart-empty hidden">No opted-in traffic in this range.</p></section>
+                <section class="analytics-chart"><h3>Visitor devices</h3><div class="analytics-canvas-container"><canvas id="deviceChart" role="img" aria-label="Desktop, mobile, and tablet distribution"></canvas></div><p class="chart-empty hidden">No device data in this range.</p></section>
+                <section class="analytics-chart"><h3>Most visited pages</h3><div class="analytics-canvas-container"><canvas id="pagesChart" role="img" aria-label="Most visited portfolio pages"></canvas></div><p class="chart-empty hidden">No page views in this range.</p></section>
+                <section class="analytics-chart"><h3>Traffic sources</h3><div class="analytics-canvas-container"><canvas id="sourcesChart" role="img" aria-label="Portfolio traffic sources"></canvas></div><p class="chart-empty hidden">No referring sources in this range.</p></section>
+                <section class="analytics-chart"><h3>Landing and exit pages</h3><div class="analytics-canvas-container"><canvas id="landingExitChart" role="img" aria-label="Visitor landing and exit pages"></canvas></div><p class="chart-empty hidden">No session page data in this range.</p></section>
+                <section class="analytics-chart"><h3>Browser and operating system</h3><div class="analytics-canvas-container"><canvas id="technologyChart" role="img" aria-label="Visitor browser and operating system categories"></canvas></div><p class="chart-empty hidden">No browser or operating system data in this range.</p></section>
+                <section class="analytics-chart"><h3>Most popular projects</h3><div class="analytics-canvas-container"><canvas id="projectsChart" role="img" aria-label="Most clicked portfolio projects"></canvas></div><p class="chart-empty hidden">No project interactions in this range.</p></section>
+                <section class="analytics-chart"><h3>Most viewed sections</h3><div class="analytics-canvas-container"><canvas id="sectionsChart" role="img" aria-label="Most viewed portfolio sections"></canvas></div><p class="chart-empty hidden">No section views in this range.</p></section>
+                <section class="analytics-chart"><h3>Previous aggregate analytics</h3><p class="muted">Legacy records have no timestamps or sessions and are shown separately.</p><div class="analytics-canvas-container"><canvas id="legacyChart" role="img" aria-label="Older aggregate portfolio interactions"></canvas></div><p class="chart-empty hidden">No legacy aggregate actions were recorded.</p></section>
+                <section class="analytics-chart analytics-chart-wide"><h3>Engagement and page views</h3><div class="analytics-canvas-container"><canvas id="engagementChart" role="img" aria-label="Visitor engagement and page views over time"></canvas></div><p class="chart-empty hidden">No engagement in this range.</p></section>
+                <section class="analytics-chart"><h3>Visitor engagement ranking</h3><p class="muted">Anonymous and signed-in status only; visitor names and account IDs are never included.</p><ol class="analytics-ranking" id="analyticsRanking"><li>Loading ranking…</li></ol></section>
+                <section class="analytics-chart"><h3>Live activity</h3><p class="muted">Refreshes every 30 seconds while this section is open.</p><ol class="analytics-activity" id="analyticsActivity"><li>Loading activity…</li></ol></section>
+              </div>
+              <p class="privacy-note">Country statistics are unavailable: this installation does not use IP geolocation or a third-party location provider. Session, average duration, and bounce metrics include opted-in sessions only; duration is approximate if a browser closes before sending its final heartbeat.</p>
+            </section>
+          </form>
+
+          <section class="tab-panel security-panel" data-panel="security" hidden>
+            <div class="panel-intro"><h2>Administrator security</h2><p>Change the owner password and revoke all active sessions. Visitor accounts cannot access these controls.</p></div>
+            <div class="security-summary">
+              <article><span>Active admin sessions</span><strong id="activeAdminSessions">—</strong></article>
+              <article><span>Password last changed</span><strong id="passwordChangedAt">—</strong></article>
+              <article><span>Session lifetime</span><strong>30 minutes</strong></article>
+            </div>
+            <form class="security-form" id="passwordChangeForm" autocomplete="off">
+              <h3>Change admin password</h3>
+              <p>Use a unique passphrase with at least 12 characters. Passwords are hashed with bcrypt before being stored in the server database.</p>
+              <label>Current password<input name="currentPassword" type="password" autocomplete="current-password" required /></label>
+              <label>New password<input name="newPassword" type="password" minlength="12" maxlength="72" autocomplete="new-password" required /></label>
+              <label>Confirm new password<input name="confirmPassword" type="password" minlength="12" maxlength="72" autocomplete="new-password" required /></label>
+              <button class="button button-primary" type="submit">Update password</button>
+              <p class="form-message" id="securityMessage" role="status" aria-live="polite"></p>
+            </form>
+            <div class="security-form revoke-sessions">
+              <h3>Sign out all devices</h3>
+              <p>Revoke every active administrator session, including this one. You will need to sign in again.</p>
+              <button class="button button-secondary" id="logoutAllButton" type="button">Revoke all sessions</button>
+            </div>
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <dialog class="admin-dialog" id="previewDialog" aria-labelledby="previewHeading">
+      <div class="dialog-heading"><div><p class="eyebrow">UNPUBLISHED PREVIEW</p><h2 id="previewHeading">Portfolio draft preview</h2></div><button class="icon-button" type="button" data-close-dialog="previewDialog" aria-label="Close preview"><i data-lucide="x" aria-hidden="true"></i></button></div>
+      <div class="preview-content" id="previewContent"></div>
+    </dialog>
+
+    <dialog class="admin-dialog" id="revisionsDialog" aria-labelledby="revisionsHeading">
+      <div class="dialog-heading"><div><p class="eyebrow">VERSION HISTORY</p><h2 id="revisionsHeading">Published revisions</h2></div><button class="icon-button" type="button" data-close-dialog="revisionsDialog" aria-label="Close history"><i data-lucide="x" aria-hidden="true"></i></button></div>
+      <p class="muted">Restoring loads a revision into the draft editor. It does not publish until you choose Publish.</p>
+      <p class="form-message" id="revisionsMessage" role="status" aria-live="polite"></p>
+      <ol class="revision-list" id="revisionList"></ol>
+    </dialog>
+
+    <template id="educationTemplate">
+      <article class="repeat-item">
+        <div class="repeat-item-heading"><span class="item-number"></span><button class="icon-button remove-item" type="button" aria-label="Remove education" title="Remove education"><i data-lucide="trash-2" aria-hidden="true"></i></button></div>
+        <div class="field-grid">
+          <label>Period<input data-field="period" type="text" maxlength="120" required /></label>
+          <label>Qualification<input data-field="title" type="text" maxlength="180" required /></label>
+          <label class="field-wide">School and details<input data-field="description" type="text" maxlength="500" required /></label>
+        </div>
+      </article>
+    </template>
+
+    <template id="focusTemplate">
+      <article class="repeat-item">
+        <div class="repeat-item-heading"><span class="item-number"></span><button class="icon-button remove-item" type="button" aria-label="Remove focus area" title="Remove focus area"><i data-lucide="trash-2" aria-hidden="true"></i></button></div>
+        <div class="field-grid">
+          <label>Section title<input data-field="title" type="text" maxlength="120" required /></label>
+          <label>Lucide icon name<input data-field="icon" type="text" maxlength="40" placeholder="cpu, activity, panels-top-left" required /></label>
+          <label class="field-wide">Description<textarea data-field="description" rows="3" maxlength="600" required></textarea></label>
+        </div>
+      </article>
+    </template>
+
+    <template id="projectsTemplate">
+      <article class="repeat-item">
+        <div class="repeat-item-heading"><span class="item-number"></span><button class="icon-button remove-item" type="button" aria-label="Remove project" title="Remove project"><i data-lucide="trash-2" aria-hidden="true"></i></button></div>
+        <div class="field-grid">
+          <label>Project number<input data-field="number" type="text" maxlength="20" required /></label>
+          <label>Category<input data-field="category" type="text" maxlength="80" required /></label>
+          <label class="field-wide">Project title<input data-field="title" type="text" maxlength="180" required /></label>
+          <label class="field-wide">Description<textarea data-field="description" rows="3" maxlength="800" required></textarea></label>
+          <label class="field-wide">Project URL<input data-field="url" type="text" maxlength="500" placeholder="https:// or #contact" required /></label>
+        </div>
+      </article>
+    </template>
+
+    <template id="contactsTemplate">
+      <article class="repeat-item">
+        <div class="repeat-item-heading"><span class="item-number"></span><button class="icon-button remove-item" type="button" aria-label="Remove contact link" title="Remove contact link"><i data-lucide="trash-2" aria-hidden="true"></i></button></div>
+        <div class="field-grid">
+          <label>Link label<input data-field="label" type="text" maxlength="120" required /></label>
+          <label>Lucide icon name<input data-field="icon" type="text" maxlength="40" placeholder="mail, github, linkedin" required /></label>
+          <label class="field-wide">URL<input data-field="href" type="text" maxlength="500" placeholder="https://, mailto:, tel:, or #section" required /></label>
+          <label class="checkbox-field"><input data-field="external" type="checkbox" />Open in a new tab</label>
+        </div>
+      </article>
+    </template>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+    <script src="/vendor/chart.js" defer></script>
+    <script src="/blob-upload.js" defer></script>
+    <script src="admin.js" defer></script>
+  </body>
+</html>

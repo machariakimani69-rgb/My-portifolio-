@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" role="img" aria-labelledby="title description">
+  <title id="title">Computer science study</title>
+  <desc id="description">An original vector illustration of a student studying programming at a laptop beside books and a desk lamp.</desc>
+  <rect width="960" height="620" fill="#e8f0ea"/>
+  <path d="M0 470h960v150H0z" fill="#d4e2d8"/>
+  <circle cx="770" cy="120" r="64" fill="#f2c6a8"/>
+  <path d="M0 386c120-72 192-55 278-10 86 45 148 32 226-22 78-54 166-50 254-8 88 42 133 42 202 1v123H0z" fill="#c2d8cb"/>
+  <rect x="118" y="103" width="300" height="224" rx="10" fill="#fffdf9" stroke="#376354" stroke-width="8"/>
+  <rect x="137" y="122" width="262" height="185" rx="4" fill="#20382f"/>
+  <path d="M164 157h96M164 183h144M164 209h72M164 235h120" stroke="#8bd7ac" stroke-width="8" stroke-linecap="round"/>
+  <path d="M164 261h53" stroke="#ee9875" stroke-width="8" stroke-linecap="round"/>
+  <path d="M75 344h390l-38 30H113z" fill="#376354"/>
+  <path d="M480 458h355" stroke="#513c32" stroke-width="26" stroke-linecap="round"/>
+  <path d="M500 480v94M806 480v94" stroke="#513c32" stroke-width="18" stroke-linecap="round"/>
+  <rect x="544" y="355" width="130" height="89" rx="6" fill="#fffdf9" stroke="#426b58" stroke-width="7"/>
+  <path d="M561 380h92M561 400h73M561 420h82" stroke="#8aa894" stroke-width="6" stroke-linecap="round"/>
+  <rect x="684" y="395" width="70" height="49" rx="4" fill="#e18a68"/>
+  <path d="M719 395v49" stroke="#fff4e9" stroke-width="4"/>
+  <path d="M830 190v153M777 344h112" stroke="#315b4a" stroke-width="10" stroke-linecap="round"/>
+  <path d="m785 189 56-66 55 66z" fill="#e18a68" stroke="#315b4a" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M815 207h53l20 70h-93z" fill="#f3c77a" opacity=".72"/>
+  <path d="M244 375c-8 25-28 39-53 46-21 7-36 18-41 38h185c-4-28-25-45-55-54-15-5-23-15-25-30z" fill="#e18a68"/>
+  <path d="M206 418c28 15 60 17 91 0" fill="none" stroke="#f8d3bd" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="241" cy="350" r="40" fill="#8b543c"/>
+  <path d="M204 348c2-37 30-61 64-51 21 6 31 22 29 46-18-2-32-12-41-27-10 18-28 29-52 32" fill="#263b32"/>
+  <path d="M210 370c14 16 45 20 64 1" fill="none" stroke="#553728" stroke-width="6" stroke-linecap="round"/>
+  <path d="M198 466h96" stroke="#315b4a" stroke-width="10" stroke-linecap="round"/>
+</svg>

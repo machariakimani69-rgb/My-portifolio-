@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" role="img" aria-labelledby="title description">
+  <title id="title">Athletics and balance</title>
+  <desc id="description">Original vector artwork of an athlete running on a track beside a campus and green landscape.</desc>
+  <rect width="960" height="620" fill="#eaf0e8"/>
+  <circle cx="782" cy="115" r="67" fill="#f2c77f"/>
+  <path d="M0 310c142-92 248-79 357-17 97 55 177 62 277 9 121-64 205-46 326 12v177H0z" fill="#b9d1bd"/>
+  <path d="M0 392c129-57 225-42 328 16 118 67 201 82 337 23 101-43 195-39 295 7v87H0z" fill="#75977c"/>
+  <path d="M0 478c154-76 286-42 414 15 123 55 256 54 382-5 61-28 118-37 164-24v156H0z" fill="#d8b9a0"/>
+  <path d="M0 528c155-69 293-38 421 20 132 59 255 55 382-3 57-26 111-34 157-26" fill="none" stroke="#fff6ec" stroke-width="9"/>
+  <path d="M94 296V167h149v146M117 191h103M117 222h103M117 253h103" fill="#fffdf9" stroke="#416751" stroke-width="8"/>
+  <path d="M184 353c22-20 44-29 70-30l41 3" fill="none" stroke="#694b3c" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="307" cy="226" r="34" fill="#8b543c"/>
+  <path d="M276 222c3-30 26-47 52-38 17 6 25 20 22 39-17-1-29-9-36-22-9 13-21 21-38 21" fill="#263b32"/>
+  <path d="m299 262-49 70 88 39 47-59" fill="none" stroke="#e18a68" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m256 330-86 27-55 67M337 370l79 24 78-27" fill="none" stroke="#315b4a" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m290 275 61 11 55-43" fill="none" stroke="#8b543c" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m270 277-48 42-56-4" fill="none" stroke="#8b543c" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M128 422h61M471 368h61" stroke="#fff6ec" stroke-width="9" stroke-linecap="round"/>
+  <path d="M617 351c4-32 23-49 48-49 30 0 47 22 49 53" fill="none" stroke="#416751" stroke-width="10" stroke-linecap="round"/>
+  <path d="M645 355v68M685 355v68M632 424h67" stroke="#416751" stroke-width="9" stroke-linecap="round"/>
+</svg>

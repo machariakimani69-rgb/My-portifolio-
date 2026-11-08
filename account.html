@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="Optional visitor sign-in and account dashboard for the David Macharia Kimani portfolio." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="account.css" />
+    <title>Visitor account | David Macharia Kimani</title>
+  </head>
+  <body>
+    <main class="account-shell">
+      <a class="account-brand" href="index.html">DMK<span>.</span></a>
+      <section class="account-card" id="authenticationPanel" aria-labelledby="accountHeading">
+        <p class="account-eyebrow">Visitor access</p>
+        <h1 id="accountHeading">Welcome</h1>
+        <p class="account-intro">Sign in or create a free visitor account to access the portfolio.</p>
+        <div class="account-tabs" role="tablist" aria-label="Visitor account options">
+          <button class="account-tab active" id="loginTab" type="button" role="tab" aria-selected="true" aria-controls="loginPanel" data-mode="login">Sign in</button>
+          <button class="account-tab" id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="registerPanel" data-mode="register">Create account</button>
+        </div>
+        <p class="account-message" id="accountMessage" role="status" aria-live="polite"></p>
+
+        <form id="loginPanel" class="account-form" autocomplete="on">
+          <label>Email address<input name="email" type="email" maxlength="254" autocomplete="email" required /></label>
+          <label>Password
+            <span class="password-field">
+              <input name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required />
+              <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+            </span>
+          </label>
+          <button class="account-submit" type="submit">Sign in</button>
+          <button class="account-text-button" id="forgotPasswordLink" type="button">Forgot Password?</button>
+        </form>
+
+        <form id="forgotPasswordPanel" class="account-form hidden" autocomplete="off" hidden>
+          <p>Enter your registered email and the private recovery key you set for this account. Email reset links are not available.</p>
+          <label for="recoveryEmail">Registered email
+            <input id="recoveryEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
+          </label>
+          <label for="visitorRecoveryKey">Recovery key
+            <input id="visitorRecoveryKey" name="recoveryKey" type="password" maxlength="256" autocomplete="off" required />
+          </label>
+          <button class="account-submit" type="submit">Verify and continue</button>
+          <button class="account-text-button" id="recoveryBackLink" type="button">Back to sign in</button>
+        </form>
+
+        <form id="resetPasswordPanel" class="account-form hidden" autocomplete="off" hidden>
+          <p>Your reset token is valid for 15 minutes. Choose a new password of 8–128 characters.</p>
+          <label for="visitorNewPassword">New password
+            <input id="visitorNewPassword" name="newPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required />
+          </label>
+          <label for="visitorConfirmPassword">Confirm new password
+            <input id="visitorConfirmPassword" name="confirmPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required />
+          </label>
+          <button class="account-submit" type="submit">Reset password</button>
+          <button class="account-text-button" id="resetBackLink" type="button">Cancel and return to sign in</button>
+        </form>
+
+        <form id="registerPanel" class="account-form hidden" autocomplete="on" hidden>
+          <label>Display name<input name="name" type="text" minlength="2" maxlength="60" autocomplete="nickname" required /></label>
+          <label>Email address<input name="email" type="email" maxlength="254" autocomplete="email" required /></label>
+          <label>Password
+            <span class="password-field">
+              <input name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" aria-describedby="passwordHint" required />
+              <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+            </span>
+          </label>
+          <small class="password-hint" id="passwordHint">Use at least 8 characters. For a stronger password, choose a unique phrase made of 4 or more unrelated words. Avoid names, dates, and reused passwords.</small>
+          <label>Recovery key
+            <span class="password-field">
+              <input name="recoveryKey" type="password" minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="recoveryKeyHint" required />
+              <button class="password-toggle" type="button" aria-label="Show recovery key" aria-pressed="false">Show</button>
+            </span>
+          </label>
+          <small class="password-hint" id="recoveryKeyHint">Choose a separate 12–128 character key and save it somewhere private. It is stored as a one-way hash and cannot be recovered; you can replace it while signed in.</small>
+          <label>Confirm recovery key<input name="recoveryKeyConfirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required /></label>
+          <label class="privacy-consent"><input name="privacyAccepted" type="checkbox" required /><span>I understand my display name and email are stored for this account, and my password and recovery key are stored as one-way hashes. If I send a message or comment, it is stored for the owner; an approved comment shows my display name publicly. I can delete my account from the dashboard.</span></label>
+          <button class="account-submit" type="submit">Create account</button>
+        </form>
+        <div class="account-notice">
+          <strong>Good to know</strong>
+          <p>Your account email is private. Contact messages are saved to a local owner inbox and are not emailed; comments are private until approved, then show your display name. Deleting your account also removes its follows, comments, and messages from the live database; retained server backups follow the owner's backup-retention policy. Password recovery uses your private recovery key; no reset email is sent.</p>
+        </div>
+        <a class="account-back-link" href="index.html">Back to the portfolio</a>
+        <a class="account-admin-link" href="admin">Owner? Go to the private admin sign in</a>
+      </section>
+
+      <section class="account-card hidden" id="visitorDashboard" aria-labelledby="dashboardHeading" hidden>
+        <p class="account-eyebrow">Your visitor dashboard</p>
+        <h1 id="dashboardHeading">You’re signed in</h1>
+        <p class="account-intro">Your account is private. Use the button below to continue to the portfolio.</p>
+        <dl class="account-details">
+          <div><dt>Display name</dt><dd id="visitorName"></dd></div>
+          <div><dt>Email</dt><dd id="visitorEmail"></dd></div>
+          <div><dt>Account created</dt><dd id="visitorCreatedAt"></dd></div>
+        </dl>
+        <div class="dashboard-actions">
+          <a class="account-submit" href="index.html">Visit the portfolio</a>
+          <button class="account-secondary" id="visitorLogout" type="button">Sign out</button>
+        </div>
+        <form class="account-form recovery-key-settings" id="recoveryKeySettingsForm" autocomplete="off">
+          <h2>Account recovery key</h2>
+          <p>Set or replace your private recovery key. You’ll need it together with your email if you forget your password.</p>
+          <label>Current password
+            <input name="currentPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" required />
+          </label>
+          <label>New recovery key
+            <input name="recoveryKey" type="password" minlength="12" maxlength="128" autocomplete="new-password" required />
+          </label>
+          <label>Confirm recovery key
+            <input name="recoveryKeyConfirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required />
+          </label>
+          <button class="account-secondary" type="submit">Save recovery key</button>
+          <p class="account-message" id="recoveryKeySettingsMessage" role="status" aria-live="polite"></p>
+        </form>
+        <button class="account-danger-link" id="showDeleteAccount" type="button">Delete account</button>
+        <form class="account-form delete-account-form hidden" id="deleteAccountForm" hidden>
+          <p>Deleting your account permanently removes its profile, follows, comments, and contact messages from the live server database.</p>
+          <label>Confirm your password
+            <span class="password-field">
+              <input name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required />
+              <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+            </span>
+          </label>
+          <label class="privacy-consent"><input name="confirmDeletion" type="checkbox" required /><span>I understand this cannot be undone.</span></label>
+          <button class="account-danger-button" type="submit">Permanently delete account</button>
+        </form>
+        <p class="account-message" id="dashboardMessage" role="status" aria-live="polite"></p>
+        <a class="account-back-link" href="index.html">Back to the portfolio</a>
+      </section>
+    </main>
+    <script src="account.js" defer></script>
+  </body>
+</html>
