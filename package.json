@@ -8,6 +8,7 @@
     "dev": "node --watch server.js",
     "build": "node scripts/build.js",
     "migrate:vercel": "node scripts/migrate-vercel.js",
+    "migrate:render": "node scripts/migrate-render.js",
     "test": "node --test"
   },
   "engines": {
