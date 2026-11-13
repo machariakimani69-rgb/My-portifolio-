@@ -1,17 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "npm run build",
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30,
-      "includeFiles": "{*.html,*.css,*.js,assets/**,myimages/**,my images/**,data/portfolio.json,node_modules/chart.js/dist/chart.umd.js,dist/blob-upload.js}"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index?__vercel_path=/$1"
-    }
-  ]
+  "buildCommand": null,
+  "installCommand": "npm install"
 }

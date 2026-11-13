@@ -1,11 +1,11 @@
 {
   "name": "David Macharia Kimani",
   "tagline": "Software Engineer · Computer Science Student",
-  "intro": "I’m a software engineer pursuing Computer Science at the University of Embu. I build responsive, user-friendly web experiences and enjoy exploring how thoughtful code and design can solve everyday problems.",
+  "intro": "I'm a software engineer pursuing Computer Science at the University of Embu. I build responsive, user-friendly web experiences and enjoy exploring how thoughtful code and design can solve everyday problems.",
   "aboutHeading": "Building useful digital experiences, one project at a time.",
   "aboutParagraphs": [
-    "I’m a software engineer pursuing a BSc in Computer Science at the University of Embu (2024–2028). I’m deepening my foundation in programming, computational thinking, and problem-solving while turning ideas into useful digital experiences.",
-    "My current focus is frontend development: using HTML, CSS, and JavaScript to create responsive, accessible interfaces. I’m keen to keep learning and apply my skills through hands-on projects.",
+    "I'm a software engineer pursuing a BSc in Computer Science at the University of Embu (2024–2028). I'm deepening my foundation in programming, computational thinking, and problem-solving while turning ideas into useful digital experiences.",
+    "My current focus is frontend development: using HTML, CSS, and JavaScript to create responsive, accessible interfaces. I'm keen to keep learning and apply my skills through hands-on projects.",
     "Coding and athletics are two of my favorite interests. Athletics helps me practice discipline, consistency, and focus, while coding lets me explore ideas and build useful things."
   ],
   "skills": [
@@ -51,6 +51,53 @@
       "description": "Mwihangia Primary School · 299 marks"
     }
   ],
-  "projects": [],
-  "contacts": []
+  "projects": [
+    {
+      "number": "01",
+      "title": "Portfolio Website",
+      "category": "Frontend",
+      "description": "A responsive personal portfolio with visitor authentication, admin dashboard, analytics, and content management. Built with vanilla JavaScript, Node.js HTTP server, and Turso/libSQL database.",
+      "url": "https://github.com/machariakimani69-rgb/My-portifolio-"
+    },
+    {
+      "number": "02",
+      "title": "Contact Form System",
+      "category": "Fullstack",
+      "description": "A contact form with visitor authentication, rate limiting, and admin inbox. Messages are stored in the database and managed from the admin panel.",
+      "url": "https://github.com/machariakimani69-rgb/My-portifolio-"
+    },
+    {
+      "number": "03",
+      "title": "Analytics Dashboard",
+      "category": "Backend",
+      "description": "Privacy-focused analytics with opt-in consent, pseudonymous visitor tracking, and CSV/PDF export. No IP addresses or account IDs are stored.",
+      "url": "https://github.com/machariakimani69-rgb/My-portifolio-"
+    }
+  ],
+  "contacts": [
+    {
+      "label": "GitHub",
+      "href": "https://github.com/machariakimani69-rgb",
+      "icon": "github",
+      "external": true
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/david-kimani",
+      "icon": "linkedin",
+      "external": true
+    },
+    {
+      "label": "Email",
+      "href": "mailto:machariakimani69@gmail.com",
+      "icon": "mail",
+      "external": true
+    },
+    {
+      "label": "WhatsApp",
+      "href": "https://wa.me/254700000000",
+      "icon": "message-circle",
+      "external": true
+    }
+  ]
 }

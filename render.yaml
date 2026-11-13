@@ -5,7 +5,7 @@ services:
     repo: https://github.com/machariakimani69-rgb/My-portifolio-
     branch: main
     rootDir: .
-    buildCommand: npm install && npm run build
+    buildCommand: npm install
     startCommand: node server.js
     healthCheckPath: /api/health
     envVars:
@@ -16,6 +16,8 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_RECOVERY_KEY
         sync: false
       - key: TURSO_DATABASE_URL
         sync: false
