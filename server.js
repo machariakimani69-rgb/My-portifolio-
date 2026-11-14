@@ -374,6 +374,20 @@ function hasSameOrigin(request) {
   }
 }
 
+function isValidApiBaseUrl(value) {
+  if (typeof value !== 'string') return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.origin === value && url.pathname === '/';
+  } catch {
+    return false;
+  }
+}
+
+function escapeJsString(value) {
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
 function readJson(request, maxBytes = MAX_BODY_BYTES) {
   if (request.body !== undefined) {
     const body = Buffer.isBuffer(request.body) ? request.body.toString('utf8')
@@ -948,6 +962,23 @@ async function serveStatic(request, response, pathname, search = '') {
       'Cache-Control': 'no-store',
     });
     return response.end();
+  }
+  if (decodedPath === '/portfolio-api-config.js') {
+    const apiBaseUrl = process.env.PORTFOLIO_API_BASE_URL;
+    if (!apiBaseUrl || !isValidApiBaseUrl(apiBaseUrl)) {
+      if (!apiBaseUrl) {
+        console.warn('PORTFOLIO_API_BASE_URL is not set; serving static portfolio-api-config.js with empty base URL.');
+      } else {
+        console.warn(`PORTFOLIO_API_BASE_URL is invalid: ${apiBaseUrl}; serving static portfolio-api-config.js with empty base URL.`);
+      }
+    } else {
+      response.writeHead(200, {
+        ...securityHeaders(),
+        'Content-Type': 'text/javascript; charset=utf-8',
+        'Cache-Control': 'no-store',
+      });
+      return response.end(`window.PORTFOLIO_API_BASE_URL = '${escapeJsString(apiBaseUrl.trim())}';`);
+    }
   }
   const relativePath = isChartLibrary
     ? path.join('node_modules', 'chart.js', 'dist', 'chart.umd.js')

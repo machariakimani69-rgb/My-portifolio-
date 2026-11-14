@@ -12,6 +12,7 @@ const originalEnvironment = {
   adminRecoveryKey: process.env.ADMIN_RECOVERY_KEY,
   sessionSecret: process.env.SESSION_SECRET,
   vercel: process.env.VERCEL,
+  portfolioApiBaseUrl: process.env.PORTFOLIO_API_BASE_URL,
 };
 
 process.env.ADMIN_PASSWORD = 'test-only-admin-password';
@@ -20,6 +21,7 @@ process.env.TURSO_DATABASE_URL = 'file::memory:';
 process.env.NODE_ENV = 'test';
 process.env.SESSION_SECRET = 'test-only-session-secret-that-is-long-enough';
 process.env.ADMIN_RECOVERY_KEY = 'test-only-admin-recovery-key-that-is-long-enough';
+process.env.PORTFOLIO_API_BASE_URL = 'https://test-backend.example.com';
 delete process.env.TURSO_AUTH_TOKEN;
 delete process.env.VERCEL;
 
@@ -63,6 +65,7 @@ after(async () => {
   restore('ADMIN_RECOVERY_KEY', originalEnvironment.adminRecoveryKey);
   restore('SESSION_SECRET', originalEnvironment.sessionSecret);
   restore('VERCEL', originalEnvironment.vercel);
+  restore('PORTFOLIO_API_BASE_URL', originalEnvironment.portfolioApiBaseUrl);
 });
 
 test('admin and visitor sign-in protect and load their required pages', async () => {
@@ -443,4 +446,26 @@ test('visitor password recovery verifies the account recovery key and revokes al
   assert.equal((await obsoleteRecoveryKey.json()).resetToken, null);
   const currentRecoveryKey = await requestRecovery(email, changedRecoveryKey);
   assert.match((await currentRecoveryKey.json()).resetToken, /^[A-Za-z0-9_-]{43}$/);
+});
+
+test('portfolio-api-config.js returns the configured API base URL', async () => {
+  const config = await fetch(`${baseUrl}/portfolio-api-config.js`);
+  assert.equal(config.status, 200);
+  assert.match(config.headers.get('content-type'), /text\/javascript/);
+  assert.match(config.headers.get('cache-control'), /no-store/);
+  const body = await config.text();
+  assert.match(body, /^window\.PORTFOLIO_API_BASE_URL = 'https:\/\/test-backend\.example\.com';$/);
+});
+
+test('portfolio-api-config.js falls back to static file when env var is missing', async () => {
+  const originalValue = process.env.PORTFOLIO_API_BASE_URL;
+  delete process.env.PORTFOLIO_API_BASE_URL;
+  try {
+    const config = await fetch(`${baseUrl}/portfolio-api-config.js`);
+    assert.equal(config.status, 200);
+    const body = await config.text();
+    assert.match(body, /window\.PORTFOLIO_API_BASE_URL = '';/);
+  } finally {
+    process.env.PORTFOLIO_API_BASE_URL = originalValue;
+  }
 });
