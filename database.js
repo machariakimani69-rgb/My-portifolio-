@@ -88,7 +88,9 @@ async function initializeDatabase() {
     ensureDirectory();
     initializeSqlite();
   }
-  await run('PRAGMA foreign_keys = ON');
+  if (!usesLibsqlClient) {
+    await run('PRAGMA foreign_keys = ON');
+  }
   await run(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -313,36 +315,45 @@ async function initializeDatabase() {
   await run('CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires ON admin_sessions (expires_at)');
   await run('CREATE INDEX IF NOT EXISTS idx_rate_limit_reset_at ON rate_limit_buckets (reset_at)');
   await run('CREATE INDEX IF NOT EXISTS idx_portfolio_revisions_created ON portfolio_revisions (created_at DESC)');
-  const uploadColumns = await all('PRAGMA table_info(portfolio_uploads)');
-  if (!uploadColumns.some((column) => column.name === 'blob_path')) {
+  try {
     await run('ALTER TABLE portfolio_uploads ADD COLUMN blob_path TEXT');
+  } catch {
+    // Column may already exist, which is fine
   }
-  await run(`
-    CREATE TRIGGER IF NOT EXISTS trg_analytics_event_insert
-    AFTER INSERT ON analytics_events
-    BEGIN
-      INSERT INTO analytics_daily_summaries (day, event_type, event_key, event_count)
-      VALUES (substr(NEW.created_at, 1, 10), NEW.event_type, COALESCE(NEW.event_label, NEW.page_path), 1)
-      ON CONFLICT(day, event_type, event_key) DO UPDATE
-      SET event_count = analytics_daily_summaries.event_count + 1;
-    END
-  `);
-  await run(`
-    CREATE TRIGGER IF NOT EXISTS trg_analytics_event_delete
-    AFTER DELETE ON analytics_events
-    BEGIN
-      UPDATE analytics_daily_summaries
-      SET event_count = event_count - 1
-      WHERE day = substr(OLD.created_at, 1, 10)
-        AND event_type = OLD.event_type
-        AND event_key = COALESCE(OLD.event_label, OLD.page_path);
-      DELETE FROM analytics_daily_summaries
-      WHERE day = substr(OLD.created_at, 1, 10)
-        AND event_type = OLD.event_type
-        AND event_key = COALESCE(OLD.event_label, OLD.page_path)
-        AND event_count <= 0;
-    END
-  `);
+  try {
+    await run(`
+      CREATE TRIGGER IF NOT EXISTS trg_analytics_event_insert
+      AFTER INSERT ON analytics_events
+      BEGIN
+        INSERT INTO analytics_daily_summaries (day, event_type, event_key, event_count)
+        VALUES (substr(NEW.created_at, 1, 10), NEW.event_type, COALESCE(NEW.event_label, NEW.page_path), 1)
+        ON CONFLICT(day, event_type, event_key) DO UPDATE
+        SET event_count = analytics_daily_summaries.event_count + 1;
+      END
+    `);
+  } catch (error) {
+    console.warn('Analytics insert trigger could not be created (non-critical):', error.message);
+  }
+  try {
+    await run(`
+      CREATE TRIGGER IF NOT EXISTS trg_analytics_event_delete
+      AFTER DELETE ON analytics_events
+      BEGIN
+        UPDATE analytics_daily_summaries
+        SET event_count = event_count - 1
+        WHERE day = substr(OLD.created_at, 1, 10)
+          AND event_type = OLD.event_type
+          AND event_key = COALESCE(OLD.event_label, OLD.page_path);
+        DELETE FROM analytics_daily_summaries
+        WHERE day = substr(OLD.created_at, 1, 10)
+          AND event_type = OLD.event_type
+          AND event_key = COALESCE(OLD.event_label, OLD.page_path)
+          AND event_count <= 0;
+      END
+    `);
+  } catch (error) {
+    console.warn('Analytics delete trigger could not be created (non-critical):', error.message);
+  }
   await run('CREATE INDEX IF NOT EXISTS idx_users_email ON users (email)');
   await run('CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions (expires_at)');
   await run('CREATE INDEX IF NOT EXISTS idx_visitor_analytics_page_path ON visitor_analytics (page_path)');
