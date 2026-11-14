@@ -1,7 +1,6 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const sqlite3 = require('sqlite3').verbose();
 const { createClient } = require('@libsql/client');
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -11,6 +10,10 @@ const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
 const usesLibsqlClient = Boolean(TURSO_DATABASE_URL);
 const isRemoteDatabase = usesLibsqlClient && !TURSO_DATABASE_URL.startsWith('file:');
 let lastRateLimitCleanup = 0;
+let sqlite3;
+let db = usesLibsqlClient
+  ? createClient({ url: TURSO_DATABASE_URL, ...(TURSO_AUTH_TOKEN ? { authToken: TURSO_AUTH_TOKEN } : {}) })
+  : null;
 
 function ensureDirectory() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -20,11 +23,13 @@ if (isRemoteDatabase && !TURSO_AUTH_TOKEN) {
   throw new Error('TURSO_AUTH_TOKEN is required when TURSO_DATABASE_URL is configured.');
 }
 
-const db = usesLibsqlClient
-  ? createClient({ url: TURSO_DATABASE_URL, ...(TURSO_AUTH_TOKEN ? { authToken: TURSO_AUTH_TOKEN } : {}) })
-  : new sqlite3.Database(DATABASE_PATH, (error) => {
+function initializeSqlite() {
+  if (sqlite3) return;
+  sqlite3 = require('sqlite3').verbose();
+  db = new sqlite3.Database(DATABASE_PATH, (error) => {
     if (error) console.error('Failed to open SQLite database.', error);
   });
+}
 
 function run(sql, params = []) {
   if (usesLibsqlClient) {
@@ -79,7 +84,10 @@ function normalizeVisitorAccount(row) {
 }
 
 async function initializeDatabase() {
-  if (!isRemoteDatabase) ensureDirectory();
+  if (!usesLibsqlClient) {
+    ensureDirectory();
+    initializeSqlite();
+  }
   await run('PRAGMA foreign_keys = ON');
   await run(`
     CREATE TABLE IF NOT EXISTS users (
