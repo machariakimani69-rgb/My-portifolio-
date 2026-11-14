@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: david-kimani-portfolio
+    name: david-portfolio-backend
     runtime: node
     repo: https://github.com/machariakimani69-rgb/My-portifolio-
     branch: main

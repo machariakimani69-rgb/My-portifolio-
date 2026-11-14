@@ -15,3 +15,8 @@ data/portfolio.db-wal
 data/portfolio.draft.json
 data/portfolio-revisions/
 uploads/
+.vscode/
+portifolio-backend/
+Mycoding/
+build-output.txt
+test-output.txt
