@@ -154,8 +154,7 @@ button {
 	stroke-width: 1.8;
 }
 
-.theme-toggle,
-.menu-toggle {
+.theme-toggle {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -185,22 +184,69 @@ button {
 }
 
 .menu-toggle {
-	grid-column: 4;
-	grid-row: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--panel);
+	color: var(--ink);
+	cursor: pointer;
+	position: relative;
 }
 
 .menu-toggle svg {
-	width: 20px;
-	height: 20px;
-}
-
-.menu-icon-close,
-.menu-toggle[aria-expanded="true"] .menu-icon-open {
 	display: none;
 }
 
-.menu-toggle[aria-expanded="true"] .menu-icon-close {
-	display: block;
+/* Hamburger three-line icon */
+.menu-lines {
+	position: relative;
+	width: 20px;
+	height: 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 4px;
+}
+
+.menu-line {
+	width: 100%;
+	height: 2px;
+	background: var(--ink);
+	border-radius: 2px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	transform-origin: center;
+}
+
+.menu-line.top {
+	transform-origin: top left;
+}
+
+.menu-line.bottom {
+	transform-origin: bottom left;
+}
+
+/* Open state: lines transform into an X */
+.menu-toggle[aria-expanded="true"] .menu-line.top {
+	transform: rotate(45deg) translate(5px, 6px);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-line.middle {
+	opacity: 0;
+	transform: scaleX(0);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-line.bottom {
+	transform: rotate(-45deg) translate(5px, -6px);
+}
+
+.menu-toggle:focus-visible {
+	outline: 3px solid var(--primary);
+	outline-offset: 2px;
 }
 
 /* ===== Main ===== */
@@ -280,6 +326,61 @@ main {
 	background: var(--panel);
 	color: var(--ink);
 	font-size: 0.88rem;
+}
+
+/* ===== CV download section ===== */
+.cv-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-top: 16px;
+}
+
+.cv-actions .btn {
+	min-height: 46px;
+	padding: 11px 24px;
+	border-radius: 50px;
+	border: 1px solid var(--line);
+	background: var(--panel);
+	color: var(--ink);
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.25s ease;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-size: 0.9rem;
+}
+
+.cv-actions .btn svg {
+	width: 17px;
+	height: 17px;
+}
+
+.cv-actions .btn-primary {
+	background: linear-gradient(135deg, var(--primary), #0078a0);
+	border-color: transparent;
+	color: #ffffff;
+	box-shadow: 0 0 30px var(--primary-glow);
+}
+
+.cv-actions .btn-primary:hover {
+	box-shadow: 0 0 45px var(--primary-glow);
+	transform: translateY(-2px);
+	border-color: transparent;
+	color: #ffffff;
+}
+
+.cv-actions .btn-secondary {
+	background: transparent;
+	color: var(--ink);
+}
+
+.cv-actions .btn-secondary:hover {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: var(--primary);
+	color: var(--primary);
 }
 
 /* ===== Info grid / cards ===== */

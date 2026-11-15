@@ -275,88 +275,68 @@ a {
 	grid-column: 4;
 	grid-row: 1;
 	display: inline-flex;
-}
-
-.nav-links svg,
-.contact-links svg {
-	width: 17px;
-	height: 17px;
-	flex: 0 0 auto;
-	stroke-width: 1.8;
-}
-
-.menu-toggle {
-	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	min-width: 44px;
 	min-height: 44px;
-	color: var(--ink);
-}
-
-.nav-links svg,
-.contact-links svg {
-	width: 17px;
-	height: 17px;
-	flex: 0 0 auto;
-	stroke-width: 1.8;
-}
-
-.menu-toggle {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-width: 44px;
-	min-height: 44px;
-	color: var(--ink);
-	border: 1px solid var(--line);
-	border-radius: 6px;
-	background: var(--panel);
-	cursor: pointer;
-}
-
-.theme-toggle {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 44px;
-	min-width: 44px;
-	height: 44px;
-	flex: 0 0 auto;
 	padding: 0;
 	border: 1px solid var(--line);
 	border-radius: 6px;
 	background: var(--panel);
 	color: var(--ink);
 	cursor: pointer;
-}
-
-.theme-toggle svg {
-	width: 19px;
-	height: 19px;
-}
-
-.theme-icon-sun,
-:root[data-theme="dark"] .theme-icon-moon {
-	display: none;
-}
-
-:root[data-theme="dark"] .theme-icon-sun {
-	display: block;
+	position: relative;
 }
 
 .menu-toggle svg {
-	width: 20px;
-	height: 20px;
-}
-
-.menu-icon-close,
-.menu-toggle[aria-expanded="true"] .menu-icon-open {
 	display: none;
 }
 
-.menu-toggle[aria-expanded="true"] .menu-icon-close {
-	display: block;
+/* Hamburger three-line icon */
+.menu-lines {
+	position: relative;
+	width: 20px;
+	height: 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 4px;
+}
+
+.menu-line {
+	width: 100%;
+	height: 2px;
+	background: var(--ink);
+	border-radius: 2px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	transform-origin: center;
+}
+
+.menu-line.top {
+	transform-origin: top left;
+}
+
+.menu-line.bottom {
+	transform-origin: bottom left;
+}
+
+/* Open state: lines transform into an X */
+.menu-toggle[aria-expanded="true"] .menu-line.top {
+	transform: rotate(45deg) translate(5px, 6px);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-line.middle {
+	opacity: 0;
+	transform: scaleX(0);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-line.bottom {
+	transform: rotate(-45deg) translate(5px, -6px);
+}
+
+.menu-toggle:focus-visible {
+	outline: 3px solid var(--primary);
+	outline-offset: 2px;
 }
 
 /* ===== Buttons ===== */

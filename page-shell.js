@@ -19,6 +19,7 @@ const pageDefinitions = {
     blocks: [
       { heading: 'A little about my journey', type: 'about' },
       { heading: 'Interests and strengths', type: 'focus' },
+      { heading: 'Download my CV', type: 'cv-download' },
     ],
   },
   skills: {
@@ -284,7 +285,44 @@ function renderBlock(block) {
     section.append(contacts);
   } else if (block.type === 'contact-note') {
     section.append(createElement('div', 'page-copy', 'I’m a software engineer and Computer Science student at the University of Embu. I’m open to genuine conversations about software, coding, and collaboration.'));
+  } else if (block.type === 'cv-download') {
+    section.append(renderCvDownload());
   }
+
+  return section;
+}
+
+function renderCvDownload() {
+  const section = createElement('section', 'page-block cv-download-section', '');
+  section.append(createElement('h2', '', 'Download my CV'));
+
+  const copy = createElement('div', 'page-copy', '');
+  copy.append(createElement('p', '', 'View or download my professional CV in PDF format. No registration required.'));
+  section.append(copy);
+
+  const actions = createElement('div', 'cv-actions', '');
+  const viewLink = createElement('a', 'btn btn-primary', '');
+  viewLink.href = '/public/David_Kimani_CV.pdf';
+  viewLink.target = '_blank';
+  viewLink.rel = 'noopener noreferrer';
+  viewLink.setAttribute('aria-label', 'View CV in browser');
+  const viewIcon = createElement('i', '', '');
+  viewIcon.dataset.lucide = 'file';
+  viewIcon.setAttribute('aria-hidden', 'true');
+  viewLink.append(viewIcon, document.createTextNode(' View My CV'));
+
+  const downloadLink = createElement('a', 'btn btn-secondary', '');
+  downloadLink.href = '/public/David_Kimani_CV.pdf';
+  downloadLink.download = 'David_Kimani_CV.pdf';
+  downloadLink.rel = 'noopener noreferrer';
+  downloadLink.setAttribute('aria-label', 'Download CV as PDF');
+  const downloadIcon = createElement('i', '', '');
+  downloadIcon.dataset.lucide = 'download';
+  downloadIcon.setAttribute('aria-hidden', 'true');
+  downloadLink.append(downloadIcon, document.createTextNode(' Download CV'));
+
+  actions.append(viewLink, downloadLink);
+  section.append(actions);
 
   return section;
 }
@@ -341,12 +379,12 @@ if (pageDefinition && pageRoot) {
   menuButton.setAttribute('aria-label', 'Open navigation menu');
   menuButton.setAttribute('aria-controls', 'navLinks');
   menuButton.setAttribute('aria-expanded', 'false');
-  [['menu-icon-open', 'menu'], ['menu-icon-close', 'x']].forEach(([className, iconName]) => {
-    const icon = createElement('i', className, '');
-    icon.dataset.lucide = iconName;
-    icon.setAttribute('aria-hidden', 'true');
-    menuButton.append(icon);
+  const menuLines = createElement('div', 'menu-lines', '');
+  [['top', ''], ['middle', ''], ['bottom', '']].forEach(([className]) => {
+    const line = createElement('span', 'menu-line ' + className, '');
+    menuLines.append(line);
   });
+  menuButton.append(menuLines);
   navWrap.append(brand, navigation, themeButton, menuButton);
   header.append(navWrap);
 
