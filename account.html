@@ -37,14 +37,11 @@
         </form>
 
         <form id="forgotPasswordPanel" class="account-form hidden" autocomplete="off" hidden>
-          <p>Enter your registered email and the private recovery key you set for this account. Email reset links are not available.</p>
+          <p>Enter your registered email address. A password reset link will be sent to you by email.</p>
           <label for="recoveryEmail">Registered email
             <input id="recoveryEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
           </label>
-          <label for="visitorRecoveryKey">Recovery key
-            <input id="visitorRecoveryKey" name="recoveryKey" type="password" maxlength="256" autocomplete="off" required />
-          </label>
-          <button class="account-submit" type="submit">Verify and continue</button>
+          <button class="account-submit" type="submit">Send reset link</button>
           <button class="account-text-button" id="recoveryBackLink" type="button">Back to sign in</button>
         </form>
 
@@ -70,20 +67,12 @@
             </span>
           </label>
           <small class="password-hint" id="passwordHint">Use at least 8 characters. For a stronger password, choose a unique phrase made of 4 or more unrelated words. Avoid names, dates, and reused passwords.</small>
-          <label>Recovery key
-            <span class="password-field">
-              <input name="recoveryKey" type="password" minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="recoveryKeyHint" required />
-              <button class="password-toggle" type="button" aria-label="Show recovery key" aria-pressed="false">Show</button>
-            </span>
-          </label>
-          <small class="password-hint" id="recoveryKeyHint">Choose a separate 12–128 character key and save it somewhere private. It is stored as a one-way hash and cannot be recovered; you can replace it while signed in.</small>
-          <label>Confirm recovery key<input name="recoveryKeyConfirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required /></label>
-          <label class="privacy-consent"><input name="privacyAccepted" type="checkbox" required /><span>I understand my display name and email are stored for this account, and my password and recovery key are stored as one-way hashes. If I send a message or comment, it is stored for the owner; an approved comment shows my display name publicly. I can delete my account from the dashboard.</span></label>
+          <label class="privacy-consent"><input name="privacyAccepted" type="checkbox" required /><span>I understand my display name and email are stored for this account, and my password is stored as a one-way hash. If I send a message or comment, it is stored for the owner; an approved comment shows my display name publicly. I can delete my account from the dashboard.</span></label>
           <button class="account-submit" type="submit">Create account</button>
         </form>
         <div class="account-notice">
           <strong>Good to know</strong>
-          <p>Your account email is private. Contact messages are saved to a local owner inbox and are not emailed; comments are private until approved, then show your display name. Deleting your account also removes its follows, comments, and messages from the live database; retained server backups follow the owner's backup-retention policy. Password recovery uses your private recovery key; no reset email is sent.</p>
+          <p>Your account email is private. Contact messages are saved to a local owner inbox and are not emailed; comments are private until approved, then show your display name. Deleting your account also removes its follows, comments, and messages from the live database; retained server backups follow the owner's backup-retention policy. Password recovery uses email reset links sent to your registered address.</p>
         </div>
         <a class="account-back-link" href="index.html">Back to the portfolio</a>
         <a class="account-admin-link" href="admin">Owner? Go to the private admin sign in</a>
@@ -102,21 +91,6 @@
           <a class="account-submit" href="index.html">Visit the portfolio</a>
           <button class="account-secondary" id="visitorLogout" type="button">Sign out</button>
         </div>
-        <form class="account-form recovery-key-settings" id="recoveryKeySettingsForm" autocomplete="off">
-          <h2>Account recovery key</h2>
-          <p>Set or replace your private recovery key. You’ll need it together with your email if you forget your password.</p>
-          <label>Current password
-            <input name="currentPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" required />
-          </label>
-          <label>New recovery key
-            <input name="recoveryKey" type="password" minlength="12" maxlength="128" autocomplete="new-password" required />
-          </label>
-          <label>Confirm recovery key
-            <input name="recoveryKeyConfirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required />
-          </label>
-          <button class="account-secondary" type="submit">Save recovery key</button>
-          <p class="account-message" id="recoveryKeySettingsMessage" role="status" aria-live="polite"></p>
-        </form>
         <button class="account-danger-link" id="showDeleteAccount" type="button">Delete account</button>
         <form class="account-form delete-account-form hidden" id="deleteAccountForm" hidden>
           <p>Deleting your account permanently removes its profile, follows, comments, and contact messages from the live server database.</p>

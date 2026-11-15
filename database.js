@@ -170,15 +170,6 @@ async function initializeDatabase() {
     )
   `);
   await run(`
-    CREATE TABLE IF NOT EXISTS visitor_recovery_credentials (
-      user_id TEXT PRIMARY KEY,
-      recovery_key_salt TEXT NOT NULL,
-      recovery_key_hash TEXT NOT NULL,
-      updated_at TEXT NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-    )
-  `);
-  await run(`
     CREATE TABLE IF NOT EXISTS profile_like_clients (
       client_id_hash TEXT PRIMARY KEY,
       created_at TEXT NOT NULL
@@ -409,27 +400,6 @@ async function setVisitorPasswordResetToken(tokenHash, accountId, expiresAt) {
   );
 }
 
-async function getVisitorRecoveryCredential(accountId) {
-  return get(
-    `SELECT recovery_key_salt AS recoveryKeySalt, recovery_key_hash AS recoveryKeyHash
-     FROM visitor_recovery_credentials WHERE user_id = ?`,
-    [accountId],
-  );
-}
-
-async function setVisitorRecoveryCredential(accountId, recoveryKeySalt, recoveryKeyHash) {
-  await run('DELETE FROM visitor_password_reset_tokens WHERE user_id = ?', [accountId]);
-  await run(
-    `INSERT INTO visitor_recovery_credentials (user_id, recovery_key_salt, recovery_key_hash, updated_at)
-     VALUES (?, ?, ?, ?)
-     ON CONFLICT(user_id) DO UPDATE SET
-       recovery_key_salt = excluded.recovery_key_salt,
-       recovery_key_hash = excluded.recovery_key_hash,
-       updated_at = excluded.updated_at`,
-    [accountId, recoveryKeySalt, recoveryKeyHash, new Date().toISOString()],
-  );
-}
-
 async function consumeVisitorPasswordResetToken(tokenHash, now = Date.now()) {
   const expiresAt = new Date(now).toISOString();
   const token = await get(
@@ -587,9 +557,6 @@ async function replaceVisitorAccounts(accounts) {
          created_at = excluded.created_at`,
       [account.id, account.name, account.email, account.passwordHash, account.passwordSalt || '', 'visitor', account.createdAt],
     );
-    if (account.recoveryKeySalt && account.recoveryKeyHash) {
-      await setVisitorRecoveryCredential(account.id, account.recoveryKeySalt, account.recoveryKeyHash);
-    }
   }
 }
 
@@ -1206,8 +1173,6 @@ module.exports = {
   deleteVisitorSession,
   deleteVisitorSessionsForUser,
   setVisitorPasswordResetToken,
-  getVisitorRecoveryCredential,
-  setVisitorRecoveryCredential,
   consumeVisitorPasswordResetToken,
   updateVisitorPassword,
   createAdminSession,

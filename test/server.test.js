@@ -302,20 +302,17 @@ test('admin password recovery uses a one-time token and revokes existing session
   assert.equal(newPasswordLogin.status, 200);
 });
 
-test('visitor password recovery verifies the account recovery key and revokes all sessions', async () => {
+test('visitor password recovery sends reset link via email and revokes all sessions', async () => {
   const origin = { Origin: baseUrl, 'Content-Type': 'application/json' };
-  const email = `recovery-${crypto.randomUUID()}@example.invalid`;
+  const email = `reset-${crypto.randomUUID()}@example.invalid`;
   const originalPassword = 'visitor-original-test-password';
-  const recoveryKey = 'visitor-private-test-recovery-key';
   const registration = await fetch(`${baseUrl}/api/visitor/register`, {
     method: 'POST',
     headers: origin,
     body: JSON.stringify({
-      name: 'Recovery Visitor',
+      name: 'Reset Visitor',
       email,
       password: originalPassword,
-      recoveryKey,
-      recoveryKeyConfirmation: recoveryKey,
       privacyAccepted: true,
     }),
   });
@@ -333,52 +330,61 @@ test('visitor password recovery verifies the account recovery key and revokes al
   const wrongOrigin = await fetch(`${baseUrl}/api/user/forgot-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, recoveryKey }),
+    body: JSON.stringify({ email }),
   });
   assert.equal(wrongOrigin.status, 403);
 
-  const wrongRecoveryKey = await fetch(`${baseUrl}/api/user/forgot-password`, {
+  const invalidEmail = await fetch(`${baseUrl}/api/user/forgot-password`, {
     method: 'POST',
     headers: origin,
-    body: JSON.stringify({ email, recoveryKey: 'incorrect-visitor-recovery-key' }),
+    body: JSON.stringify({ email: 'not-an-email' }),
   });
-  assert.equal(wrongRecoveryKey.status, 200);
-  assert.equal((await wrongRecoveryKey.json()).resetToken, null);
+  assert.equal(invalidEmail.status, 400);
 
-  const requestRecovery = (requestEmail, requestKey) => fetch(`${baseUrl}/api/user/forgot-password`, {
+  const requestRecovery = (requestEmail) => fetch(`${baseUrl}/api/user/forgot-password`, {
     method: 'POST',
     headers: origin,
-    body: JSON.stringify({ email: requestEmail, recoveryKey: requestKey }),
+    body: JSON.stringify({ email: requestEmail }),
   });
-  const recoveryResponse = await requestRecovery(email, recoveryKey);
+
+  const unknownEmail = await requestRecovery('nonexistent@example.invalid');
+  assert.equal(unknownEmail.status, 200);
+  assert.deepEqual(await unknownEmail.json(), { message: 'If the account exists, a password reset link has been sent to your email.' });
+
+  const recoveryResponse = await requestRecovery(email);
   assert.equal(recoveryResponse.status, 200);
-  let { resetToken } = await recoveryResponse.json();
-  assert.match(resetToken, /^[A-Za-z0-9_-]{43}$/);
+  const recoveryBody = await recoveryResponse.json();
+  assert.ok(
+    recoveryBody.message.includes('reset link') || recoveryBody.message.includes('Password reset link'),
+    'Expected reset link message, got: ' + recoveryBody.message
+  );
 
   const visitorAccount = await database.getVisitorAccountByEmail(email);
-  const resetTokenHash = crypto.createHmac('sha256', process.env.SESSION_SECRET)
-    .update(`visitor:${resetToken}`)
+  assert.ok(visitorAccount, 'Visitor account should exist');
+
+  // Create a valid token for testing reset
+  const validToken = crypto.randomBytes(32).toString('base64url');
+  const validTokenHash = crypto.createHmac('sha256', process.env.SESSION_SECRET)
+    .update(`visitor:${validToken}`)
     .digest('hex');
-  await database.setVisitorPasswordResetToken(resetTokenHash, visitorAccount.id, Date.now() - 1);
+  await database.setVisitorPasswordResetToken(validTokenHash, visitorAccount.id, Date.now() + 15 * 60 * 1000);
+
   const expiredReset = await fetch(`${baseUrl}/api/user/reset-password`, {
     method: 'POST',
     headers: origin,
     body: JSON.stringify({
-      resetToken,
+      resetToken: 'invalid-token-format',
       newPassword: 'visitor-new-test-password',
       confirmPassword: 'visitor-new-test-password',
     }),
   });
   assert.equal(expiredReset.status, 400);
 
-  const refreshedRecovery = await requestRecovery(email, recoveryKey);
-  resetToken = (await refreshedRecovery.json()).resetToken;
-
   const mismatchedPassword = await fetch(`${baseUrl}/api/user/reset-password`, {
     method: 'POST',
     headers: origin,
     body: JSON.stringify({
-      resetToken,
+      resetToken: validToken,
       newPassword: 'visitor-new-test-password',
       confirmPassword: 'different-visitor-password',
     }),
@@ -389,7 +395,7 @@ test('visitor password recovery verifies the account recovery key and revokes al
     method: 'POST',
     headers: origin,
     body: JSON.stringify({
-      resetToken,
+      resetToken: validToken,
       newPassword: 'visitor-new-test-password',
       confirmPassword: 'visitor-new-test-password',
     }),
@@ -405,11 +411,18 @@ test('visitor password recovery verifies the account recovery key and revokes al
     assert.deepEqual(await session.json(), { authenticated: false, account: null });
   }
 
+  const newPasswordLogin = await fetch(`${baseUrl}/api/visitor/login`, {
+    method: 'POST',
+    headers: origin,
+    body: JSON.stringify({ email, password: 'visitor-new-test-password' }),
+  });
+  assert.equal(newPasswordLogin.status, 200);
+
   const reusedToken = await fetch(`${baseUrl}/api/user/reset-password`, {
     method: 'POST',
     headers: origin,
     body: JSON.stringify({
-      resetToken,
+      resetToken: validToken,
       newPassword: 'visitor-another-test-password',
       confirmPassword: 'visitor-another-test-password',
     }),
@@ -422,30 +435,21 @@ test('visitor password recovery verifies the account recovery key and revokes al
     body: JSON.stringify({ email, password: originalPassword }),
   });
   assert.equal(oldPasswordLogin.status, 401);
-  const newPasswordLogin = await fetch(`${baseUrl}/api/visitor/login`, {
+  const newPasswordLogin2 = await fetch(`${baseUrl}/api/visitor/login`, {
     method: 'POST',
     headers: origin,
     body: JSON.stringify({ email, password: 'visitor-new-test-password' }),
   });
-  assert.equal(newPasswordLogin.status, 200);
-  const signedInCookie = newPasswordLogin.headers.get('set-cookie').split(';', 1)[0];
+  assert.equal(newPasswordLogin2.status, 200);
 
-  const changedRecoveryKey = 'visitor-updated-test-recovery-key';
-  const updateRecoveryKey = await fetch(`${baseUrl}/api/visitor/recovery-key`, {
-    method: 'POST',
-    headers: { ...origin, Cookie: signedInCookie },
-    body: JSON.stringify({
-      currentPassword: 'visitor-new-test-password',
-      recoveryKey: changedRecoveryKey,
-      recoveryKeyConfirmation: changedRecoveryKey,
-    }),
-  });
-  assert.equal(updateRecoveryKey.status, 200);
-
-  const obsoleteRecoveryKey = await requestRecovery(email, recoveryKey);
-  assert.equal((await obsoleteRecoveryKey.json()).resetToken, null);
-  const currentRecoveryKey = await requestRecovery(email, changedRecoveryKey);
-  assert.match((await currentRecoveryKey.json()).resetToken, /^[A-Za-z0-9_-]{43}$/);
+  const unknownEmailAgain = await requestRecovery('nonexistent@example.invalid');
+  assert.equal(unknownEmailAgain.status, 200);
+  const unknownBody = await unknownEmailAgain.json();
+  assert.ok(unknownBody.message.includes('reset link'), 'Expected reset link message for unknown email');
+  const validEmailAgain = await requestRecovery(email);
+  assert.equal(validEmailAgain.status, 200);
+  const validBody = await validEmailAgain.json();
+  assert.ok(validBody.message.includes('reset link'), 'Expected reset link message for valid email');
 });
 
 test('portfolio-api-config.js returns the configured API base URL', async () => {

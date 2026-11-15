@@ -53,6 +53,10 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_PASSWORD_HASH_ENV = process.env.ADMIN_PASSWORD_HASH;
 const ADMIN_RECOVERY_KEY = process.env.ADMIN_RECOVERY_KEY || '';
 const SESSION_SECRET = process.env.SESSION_SECRET;
+const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || 'resend';
+const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const EMAIL_FROM = process.env.EMAIL_FROM || '';
+const EMAIL_BASE_URL = process.env.EMAIL_BASE_URL || '';
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
@@ -304,6 +308,73 @@ function adminResetTokenHash(token) {
 
 function visitorResetTokenHash(token) {
   return crypto.createHmac('sha256', SESSION_SECRET).update(`visitor:${token}`).digest('hex');
+}
+
+async function sendPasswordResetEmail(email, resetToken, baseUrl) {
+  if (!RESEND_API_KEY || !EMAIL_FROM) {
+    console.error('Email sending is not configured: RESEND_API_KEY or EMAIL_FROM is missing.');
+    return false;
+  }
+  const resetUrl = `${baseUrl.replace(/\/$/, '')}/account.html?mode=reset&token=${encodeURIComponent(resetToken)}`;
+  const html = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset your password</title>
+  </head>
+  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #17251f; margin: 0; padding: 0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; margin: 40px auto; padding: 20px;">
+      <tr>
+        <td style="padding: 40px 30px; background: #ffffff; border-radius: 12px; border: 1px solid #d8e2da;">
+          <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #17251f;">Reset your password</h1>
+          <p style="margin: 0 0 24px 0; font-size: 16px; color: #56675e;">
+            You requested a password reset for your visitor account on David Macharia Kimani's portfolio.
+          </p>
+          <p style="margin: 0 0 30px 0; font-size: 16px; color: #56675e;">
+            Click the button below to choose a new password. This link expires in 15 minutes.
+          </p>
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <td style="background: #236653; border-radius: 6px;">
+                <a href="${resetUrl}" style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 6px;">Reset Password</a>
+              </td>
+            </tr>
+          </table>
+          <p style="margin: 30px 0 0 0; font-size: 14px; color: #56675e;">
+            If you didn't request this reset, you can safely ignore this email. The link will expire after 15 minutes and can only be used once.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: [email],
+        subject: 'Reset your portfolio password',
+        html,
+      }),
+    });
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      console.error('Resend API error:', response.status, errorBody);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to send password reset email:', error);
+    return false;
+  }
 }
 
 function matchesAdminRecoveryKey(suppliedKey) {
@@ -1510,25 +1581,13 @@ async function handleRequest(request, response) {
         return sendJson(response, 400, { error: 'Recovery details must be sent as a JSON object.' });
       }
       const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : '';
-      const recoveryKey = typeof payload.recoveryKey === 'string' ? payload.recoveryKey : '';
-      const validEmail = email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      const account = validEmail ? await database.getVisitorAccountByEmail(email) : null;
-      const credential = account ? await database.getVisitorRecoveryCredential(account.id) : null;
-      const recoverySalt = credential?.recoveryKeySalt || 'portfolio-visitor-recovery';
-      const suppliedHash = await derivePasswordHash(
-        recoveryKey.slice(0, 128),
-        recoverySalt,
-        64,
-      );
-      const storedHash = credential ? Buffer.from(credential.recoveryKeyHash, 'base64url') : Buffer.alloc(64);
-      const recoveryKeyMatches = recoveryKey.length >= 12 && recoveryKey.length <= 128
-        && Buffer.byteLength(recoveryKey, 'utf8') <= 256
-        && storedHash.length === suppliedHash.length
-        && crypto.timingSafeEqual(storedHash, suppliedHash);
-      if (!account || !credential || !recoveryKeyMatches) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+        return sendJson(response, 400, { error: 'Enter a valid email address.' });
+      }
+      const account = await database.getVisitorAccountByEmail(email);
+      if (!account) {
         return sendJson(response, 200, {
-          resetToken: null,
-          message: 'If the account details are valid, a reset token will be issued. Verify the email and recovery key.',
+          message: 'If the account exists, a password reset link has been sent to your email.',
         });
       }
 
@@ -1538,9 +1597,16 @@ async function handleRequest(request, response) {
         account.id,
         Date.now() + VISITOR_RESET_TOKEN_DURATION_MS,
       );
+
+      const emailSent = await sendPasswordResetEmail(email, resetToken, EMAIL_BASE_URL || `http://${HOST}:${PORT}`);
+      if (!emailSent) {
+        return sendJson(response, 200, {
+          message: 'If the account exists, a password reset link has been sent to your email.',
+        });
+      }
+
       return sendJson(response, 200, {
-        resetToken,
-        message: 'Recovery verified. Set a new password within 15 minutes.',
+        message: 'Password reset link sent. Check your email to reset your password.',
       });
     } catch (error) {
       if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
@@ -1627,10 +1693,6 @@ async function handleRequest(request, response) {
         const name = typeof payload.name === 'string' ? payload.name.trim() : '';
         const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : '';
         const password = typeof payload.password === 'string' ? payload.password : '';
-        const recoveryKey = typeof payload.recoveryKey === 'string' ? payload.recoveryKey : '';
-        const recoveryKeyConfirmation = typeof payload.recoveryKeyConfirmation === 'string'
-          ? payload.recoveryKeyConfirmation
-          : '';
         if (name.length < 2 || name.length > 60 || /[\u0000-\u001f\u007f]/.test(name)) {
           return sendJson(response, 400, { error: 'Enter a display name between 2 and 60 characters.' });
         }
@@ -1640,18 +1702,9 @@ async function handleRequest(request, response) {
         if (password.length < 8 || password.length > 128) {
           return sendJson(response, 400, { error: 'Choose a password between 8 and 128 characters.' });
         }
-        if (recoveryKey.length < 12 || recoveryKey.length > 128
-          || Buffer.byteLength(recoveryKey, 'utf8') > 256) {
-          return sendJson(response, 400, { error: 'Choose a recovery key between 12 and 128 characters.' });
-        }
-        if (recoveryKey !== recoveryKeyConfirmation) {
-          return sendJson(response, 400, { error: 'The recovery key and confirmation do not match.' });
-        }
 
         const passwordSalt = crypto.randomBytes(16).toString('base64url');
         const passwordHash = (await derivePasswordHash(password, passwordSalt, 64)).toString('base64url');
-        const recoveryKeySalt = crypto.randomBytes(16).toString('base64url');
-        const recoveryKeyHash = (await derivePasswordHash(recoveryKey, recoveryKeySalt, 64)).toString('base64url');
         const accounts = await readVisitorAccountsFromStore();
         if (accounts.some((account) => account.email === email)) {
           return sendJson(response, 409, { error: 'An account already uses that email. Sign in instead.' });
@@ -1662,8 +1715,6 @@ async function handleRequest(request, response) {
           email,
           passwordSalt,
           passwordHash,
-          recoveryKeySalt,
-          recoveryKeyHash,
           createdAt: new Date().toISOString(),
           privacyAcknowledgedAt: new Date().toISOString(),
         };
@@ -1708,41 +1759,6 @@ async function handleRequest(request, response) {
 
       if (request.method === 'POST' && pathname === '/api/visitor/logout') {
         return sendJson(response, 200, { authenticated: false }, { 'Set-Cookie': await clearVisitorSession(request) });
-      }
-
-      if (request.method === 'POST' && pathname === '/api/visitor/recovery-key') {
-        const session = await visitorSessionFromRequest(request);
-        if (!session) return sendJson(response, 401, { error: 'Sign in to continue.' });
-        const payload = await readJson(request);
-        if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-          return sendJson(response, 400, { error: 'Recovery key details must be sent as a JSON object.' });
-        }
-        const currentPassword = typeof payload.currentPassword === 'string' ? payload.currentPassword : '';
-        const recoveryKey = typeof payload.recoveryKey === 'string' ? payload.recoveryKey : '';
-        const recoveryKeyConfirmation = typeof payload.recoveryKeyConfirmation === 'string'
-          ? payload.recoveryKeyConfirmation
-          : '';
-        const suppliedPasswordHash = await derivePasswordHash(
-          currentPassword.slice(0, 128),
-          session.account.passwordSalt,
-          64,
-        );
-        const storedPasswordHash = Buffer.from(session.account.passwordHash, 'base64url');
-        if (currentPassword.length > 128 || storedPasswordHash.length !== suppliedPasswordHash.length
-          || !crypto.timingSafeEqual(storedPasswordHash, suppliedPasswordHash)) {
-          return sendJson(response, 401, { error: 'The current password was not accepted.' });
-        }
-        if (recoveryKey.length < 12 || recoveryKey.length > 128
-          || Buffer.byteLength(recoveryKey, 'utf8') > 256) {
-          return sendJson(response, 400, { error: 'Choose a recovery key between 12 and 128 characters.' });
-        }
-        if (recoveryKey !== recoveryKeyConfirmation) {
-          return sendJson(response, 400, { error: 'The recovery key and confirmation do not match.' });
-        }
-        const recoveryKeySalt = crypto.randomBytes(16).toString('base64url');
-        const recoveryKeyHash = (await derivePasswordHash(recoveryKey, recoveryKeySalt, 64)).toString('base64url');
-        await database.setVisitorRecoveryCredential(session.account.id, recoveryKeySalt, recoveryKeyHash);
-        return sendJson(response, 200, { saved: true });
       }
 
       if (request.method === 'DELETE' && pathname === '/api/visitor/account') {

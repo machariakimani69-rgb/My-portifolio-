@@ -9,7 +9,6 @@ const resetPasswordForm = document.querySelector('#resetPasswordPanel');
 const accountTabs = document.querySelector('.account-tabs');
 const tabs = [...document.querySelectorAll('.account-tab')];
 const deleteAccountForm = document.querySelector('#deleteAccountForm');
-const recoveryKeySettingsForm = document.querySelector('#recoveryKeySettingsForm');
 const passwordToggles = document.querySelectorAll('.password-toggle');
 let visitorResetToken = '';
 const portfolioPages = new Set([
@@ -157,7 +156,10 @@ passwordToggles.forEach((toggle) => {
     toggle.setAttribute('aria-pressed', String(showPassword));
   });
 });
-setMode(new URLSearchParams(window.location.search).get('mode') === 'register' ? 'register' : 'login');
+const urlParams = new URLSearchParams(window.location.search);
+const urlMode = urlParams.get('mode');
+visitorResetToken = urlParams.get('token') || '';
+setMode(urlMode === 'register' ? 'register' : urlMode === 'reset' ? 'reset' : 'login');
 loginForm.addEventListener('submit', (event) => {
   event.preventDefault();
   submitForm(loginForm, '/api/visitor/login', accountMessage, 'You are signed in.');
@@ -175,27 +177,25 @@ registerForm.addEventListener('submit', (event) => {
 forgotPasswordForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = forgotPasswordForm.querySelector('button[type="submit"]');
-  const recoveryKeyInput = document.querySelector('#visitorRecoveryKey');
   button.disabled = true;
-  showMessage(accountMessage, 'Verifying recovery details…');
+  showMessage(accountMessage, 'Sending reset link…');
   try {
     const formData = new FormData(forgotPasswordForm);
     const result = await accountRequest('/api/user/forgot-password', {
       method: 'POST',
       body: JSON.stringify(Object.fromEntries(formData)),
     });
-    if (!result.resetToken) {
-      showMessage(accountMessage, result.message || 'The account details could not be verified.');
+    if (!result.message) {
+      showMessage(accountMessage, result.error || 'The reset link could not be sent.');
       return;
     }
-    visitorResetToken = result.resetToken;
-    recoveryKeyInput.value = '';
-    setMode('reset');
-    document.querySelector('#visitorNewPassword').focus();
+    forgotPasswordForm.reset();
+    setMode('login');
+    showMessage(accountMessage, result.message, true);
+    loginForm.elements.email.focus();
   } catch (error) {
     showMessage(accountMessage, error.message);
   } finally {
-    recoveryKeyInput.value = '';
     button.disabled = false;
   }
 });
@@ -221,26 +221,6 @@ resetPasswordForm.addEventListener('submit', async (event) => {
     loginForm.elements.email.focus();
   } catch (error) {
     showMessage(accountMessage, error.message);
-  } finally {
-    button.disabled = false;
-  }
-});
-
-recoveryKeySettingsForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const button = recoveryKeySettingsForm.querySelector('button[type="submit"]');
-  button.disabled = true;
-  showMessage(document.querySelector('#recoveryKeySettingsMessage'), 'Saving recovery key…');
-  try {
-    const formData = new FormData(recoveryKeySettingsForm);
-    await accountRequest('/api/visitor/recovery-key', {
-      method: 'POST',
-      body: JSON.stringify(Object.fromEntries(formData)),
-    });
-    recoveryKeySettingsForm.reset();
-    showMessage(document.querySelector('#recoveryKeySettingsMessage'), 'Recovery key saved. Store it somewhere private.', true);
-  } catch (error) {
-    showMessage(document.querySelector('#recoveryKeySettingsMessage'), error.message);
   } finally {
     button.disabled = false;
   }
