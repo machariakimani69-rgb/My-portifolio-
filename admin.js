@@ -1138,6 +1138,8 @@ document.querySelector('#logoutAllButton').addEventListener('click', async (even
 document.querySelector('#uploadButton').addEventListener('click', async (event) => {
   const input = document.querySelector('#uploadFile');
   const file = input.files[0];
+  const categorySelect = document.querySelector('#uploadCategory');
+  const publicCheckbox = document.querySelector('#uploadPublic');
   const message = document.querySelector('#extensionsMessage');
   if (!file) return setMessage(message, 'Choose a file to upload.');
   if (file.size > 5 * 1024 * 1024) return setMessage(message, 'Files must be 5 MB or smaller.');
@@ -1146,7 +1148,10 @@ document.querySelector('#uploadButton').addEventListener('click', async (event) 
   setMessage(message, 'Uploading file…');
   try {
     if (typeof window.uploadPortfolioFile === 'function') {
-      await window.uploadPortfolioFile(file);
+      await window.uploadPortfolioFile(file, {
+        category: categorySelect.value,
+        isPublic: publicCheckbox.checked,
+      });
     } else {
       const bytes = new Uint8Array(await file.arrayBuffer());
       let binary = '';
@@ -1155,10 +1160,17 @@ document.querySelector('#uploadButton').addEventListener('click', async (event) 
       }
       await apiRequest('/api/admin/uploads', {
         method: 'POST',
-        body: JSON.stringify({ fileName: file.name, content: btoa(binary) }),
+        body: JSON.stringify({
+          fileName: file.name,
+          content: btoa(binary),
+          category: categorySelect.value,
+          isPublic: publicCheckbox.checked,
+        }),
       });
     }
     input.value = '';
+    categorySelect.value = 'general';
+    publicCheckbox.checked = false;
     await loadExtensions();
     setMessage(message, 'File uploaded.', true);
   } catch (error) {

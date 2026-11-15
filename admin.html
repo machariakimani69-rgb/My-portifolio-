@@ -196,8 +196,20 @@
               <div class="extensions-actions"><button class="button button-primary" id="saveExtensions" type="button"><i data-lucide="save" aria-hidden="true"></i>Save site settings</button><button class="button button-secondary" id="refreshExtensions" type="button"><i data-lucide="refresh-cw" aria-hidden="true"></i>Refresh tools</button></div>
               <p class="form-message" id="extensionsMessage" role="status" aria-live="polite"></p>
               <section class="extensions-section">
-                <h3>Local file uploads</h3><p class="muted">JPEG, PNG, WebP, or PDF · maximum 5 MB. Files are stored on this server and require visitor sign-in to view.</p>
-                <div class="upload-controls"><input id="uploadFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" /><button class="button button-secondary" id="uploadButton" type="button">Upload file</button></div>
+                <h3>Document uploads</h3><p class="muted">JPEG, PNG, WebP, or PDF · maximum 5 MB. Stored in persistent cloud storage. Public documents are viewable by anyone; private documents require visitor sign-in.</p>
+                <div class="upload-controls">
+                  <input id="uploadFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
+                  <label>Category
+                    <select id="uploadCategory">
+                      <option value="general">General</option>
+                      <option value="cv">CV / Resume</option>
+                      <option value="certificate">Certificate</option>
+                      <option value="recommendation">Recommendation Letter</option>
+                    </select>
+                  </label>
+                  <label class="checkbox-field"><input id="uploadPublic" type="checkbox" />Public (anyone can view)</label>
+                  <button class="button button-secondary" id="uploadButton" type="button">Upload file</button>
+                </div>
                 <ul class="managed-list" id="uploadList"></ul>
               </section>
               <section class="extensions-section">

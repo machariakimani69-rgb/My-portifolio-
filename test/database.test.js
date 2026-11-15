@@ -56,9 +56,9 @@ test('persists account sessions, rate limits, portfolio state, and uploaded-file
     contentType: 'application/pdf',
     fileSize: 128,
     uploadedAt: new Date().toISOString(),
-    blobPath: 'portfolio/resume.pdf',
+    r2Key: 'portfolio/resume.pdf',
   });
-  assert.equal((await database.getPortfolioUpload('22222222-2222-4222-8222-222222222222')).blobPath, 'portfolio/resume.pdf');
+  assert.equal((await database.getPortfolioUpload('22222222-2222-4222-8222-222222222222')).r2Key, 'portfolio/resume.pdf');
 
   await database.deleteVisitorAccount(account.id);
   assert.equal(await database.getVisitorSession(tokenHash), null);

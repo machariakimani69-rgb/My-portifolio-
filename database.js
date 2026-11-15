@@ -217,7 +217,10 @@ async function initializeDatabase() {
       original_name TEXT NOT NULL,
       content_type TEXT NOT NULL,
       file_size INTEGER NOT NULL,
-      uploaded_at TEXT NOT NULL
+      uploaded_at TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'general',
+      is_public INTEGER NOT NULL DEFAULT 0,
+      r2_key TEXT
     )
   `);
   await run(`
@@ -308,6 +311,21 @@ async function initializeDatabase() {
   await run('CREATE INDEX IF NOT EXISTS idx_portfolio_revisions_created ON portfolio_revisions (created_at DESC)');
   try {
     await run('ALTER TABLE portfolio_uploads ADD COLUMN blob_path TEXT');
+  } catch {
+    // Column may already exist, which is fine
+  }
+  try {
+    await run('ALTER TABLE portfolio_uploads ADD COLUMN category TEXT DEFAULT \'general\'');
+  } catch {
+    // Column may already exist, which is fine
+  }
+  try {
+    await run('ALTER TABLE portfolio_uploads ADD COLUMN is_public INTEGER DEFAULT 0');
+  } catch {
+    // Column may already exist, which is fine
+  }
+  try {
+    await run('ALTER TABLE portfolio_uploads ADD COLUMN r2_key TEXT');
   } catch {
     // Column may already exist, which is fine
   }
@@ -753,22 +771,25 @@ async function deleteContactMessage(id) {
 
 async function addPortfolioUpload(upload) {
   await run(
-    `INSERT INTO portfolio_uploads (id, original_name, content_type, file_size, uploaded_at, blob_path)
-     VALUES (?, ?, ?, ?, ?, ?)
+    `INSERT INTO portfolio_uploads (id, original_name, content_type, file_size, uploaded_at, category, is_public, r2_key)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        original_name = excluded.original_name,
        content_type = excluded.content_type,
        file_size = excluded.file_size,
        uploaded_at = excluded.uploaded_at,
-       blob_path = excluded.blob_path`,
-    [upload.id, upload.originalName, upload.contentType, upload.fileSize, upload.uploadedAt, upload.blobPath || null],
+       category = excluded.category,
+       is_public = excluded.is_public,
+       r2_key = excluded.r2_key`,
+    [upload.id, upload.originalName, upload.contentType, upload.fileSize, upload.uploadedAt, upload.category || 'general', upload.isPublic ? 1 : 0, upload.r2Key || null],
   );
 }
 
 async function listPortfolioUploads() {
   return all(
     `SELECT id, original_name AS originalName, content_type AS contentType,
-            file_size AS fileSize, uploaded_at AS uploadedAt, blob_path AS blobPath
+            file_size AS fileSize, uploaded_at AS uploadedAt, category,
+            is_public AS isPublic, r2_key AS r2Key
      FROM portfolio_uploads ORDER BY uploaded_at DESC LIMIT 200`,
   );
 }
@@ -776,7 +797,8 @@ async function listPortfolioUploads() {
 async function getPortfolioUpload(id) {
   return get(
     `SELECT id, original_name AS originalName, content_type AS contentType,
-            file_size AS fileSize, uploaded_at AS uploadedAt, blob_path AS blobPath
+            file_size AS fileSize, uploaded_at AS uploadedAt, category,
+            is_public AS isPublic, r2_key AS r2Key
      FROM portfolio_uploads WHERE id = ?`,
     [id],
   );
@@ -786,8 +808,8 @@ async function deletePortfolioUpload(id) {
   return run('DELETE FROM portfolio_uploads WHERE id = ?', [id]);
 }
 
-async function updatePortfolioUploadBlobPath(id, blobPath) {
-  return run('UPDATE portfolio_uploads SET blob_path = ? WHERE id = ?', [blobPath, id]);
+async function updatePortfolioUploadR2Key(id, r2Key) {
+  return run('UPDATE portfolio_uploads SET r2_key = ? WHERE id = ?', [r2Key, id]);
 }
 
 async function recordAnalyticsEvent(event) {
@@ -1220,7 +1242,7 @@ module.exports = {
   listPortfolioUploads,
   getPortfolioUpload,
   deletePortfolioUpload,
-  updatePortfolioUploadBlobPath,
+  updatePortfolioUploadR2Key,
   recordAnalyticsEvent,
   touchAnalyticsSession,
   getActiveAnalyticsSessionCount,

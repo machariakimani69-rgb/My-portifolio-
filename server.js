@@ -5,8 +5,8 @@ const http = require('node:http');
 const { Readable } = require('node:stream');
 const { promisify } = require('node:util');
 const bcrypt = require('bcryptjs');
-const { del: deleteBlob, get: getBlob, put: putBlob } = require('@vercel/blob');
-const { handleUpload } = require('@vercel/blob/client');
+const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
@@ -60,6 +60,23 @@ const EMAIL_BASE_URL = process.env.EMAIL_BASE_URL || '';
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
+
+// Cloudflare R2 configuration
+const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '';
+const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || '';
+const R2_ENDPOINT = process.env.R2_ENDPOINT || '';
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
+const r2Configured = Boolean(R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME && R2_ENDPOINT);
+
+const s3Client = r2Configured ? new S3Client({
+  region: 'auto',
+  endpoint: R2_ENDPOINT,
+  credentials: {
+    accessKeyId: R2_ACCESS_KEY_ID,
+    secretAccessKey: R2_SECRET_ACCESS_KEY,
+  },
+}) : null;
 const corsAllowedOrigins = new Set((process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
   .map((origin) => origin.trim())
@@ -315,6 +332,12 @@ async function sendPasswordResetEmail(email, resetToken, baseUrl) {
     console.error('Email sending is not configured: RESEND_API_KEY or EMAIL_FROM is missing.');
     return false;
   }
+
+  const isFreeTestingSender = EMAIL_FROM.includes('onboarding@resend.dev');
+  if (isFreeTestingSender) {
+    console.warn('Resend free testing sender detected: emails will only deliver to verified addresses in your Resend account.');
+  }
+
   const resetUrl = `${baseUrl.replace(/\/$/, '')}/account.html?mode=reset&token=${encodeURIComponent(resetToken)}`;
   const html = `
 <!DOCTYPE html>
@@ -365,9 +388,25 @@ async function sendPasswordResetEmail(email, resetToken, baseUrl) {
         html,
       }),
     });
+
     if (!response.ok) {
       const errorBody = await response.text().catch(() => '');
-      console.error('Resend API error:', response.status, errorBody);
+      let errorDetail = '';
+      try {
+        const parsed = JSON.parse(errorBody);
+        errorDetail = parsed.message || errorBody;
+      } catch {
+        errorDetail = errorBody;
+      }
+      const isDomainRestricted = /domain|verified|sender|from/i.test(errorDetail);
+      if (isFreeTestingSender && isDomainRestricted) {
+        console.error(
+          'Resend free testing sender restriction: emails from onboarding@resend.dev can only deliver to verified addresses in your Resend account. ' +
+            `Recipient: ${email}. Resend error: ${errorDetail}`,
+        );
+      } else {
+        console.error('Resend API error:', response.status, errorDetail);
+      }
       return false;
     }
     return true;
@@ -1026,7 +1065,7 @@ async function serveStatic(request, response, pathname, search = '') {
 
   const isChartLibrary = decodedPath === '/vendor/chart.js';
   const isBlobClient = decodedPath === '/blob-upload.js';
-  if (isBlobClient && !process.env.BLOB_READ_WRITE_TOKEN) {
+  if (isBlobClient) {
     response.writeHead(200, {
       ...securityHeaders(),
       'Content-Type': 'text/javascript; charset=utf-8',
@@ -1070,15 +1109,21 @@ async function serveStatic(request, response, pathname, search = '') {
     return sendJson(response, 404, { error: 'Not found.' });
   }
   if (isUploadPath) {
-    const session = await visitorSessionFromRequest(request);
-    if (!session) {
-      const destination = `${pathname}${search}`;
-      response.writeHead(302, {
-        ...securityHeaders(),
-        Location: `/account.html?next=${encodeURIComponent(destination)}`,
-        'Cache-Control': 'no-store',
-      });
-      return response.end();
+    const uploadId = path.basename(canonicalRelativePath).split('.')[0];
+    const upload = await database.getPortfolioUpload(uploadId);
+    if (upload && upload.isPublic) {
+      // Public documents are accessible without authentication
+    } else {
+      const session = await visitorSessionFromRequest(request);
+      if (!session) {
+        const destination = `${pathname}${search}`;
+        response.writeHead(302, {
+          ...securityHeaders(),
+          Location: `/account.html?next=${encodeURIComponent(destination)}`,
+          'Cache-Control': 'no-store',
+        });
+        return response.end();
+      }
     }
   }
   if (Object.hasOwn(publicPages, canonicalRelativePath)) {
@@ -1111,25 +1156,26 @@ async function serveStatic(request, response, pathname, search = '') {
       if (path.extname(canonicalRelativePath).toLowerCase() !== expectedExtension) {
         return sendJson(response, 404, { error: 'Not found.' });
       }
-      if (upload.blobPath) {
-        let result;
+      if (upload.r2Key && r2Configured) {
         try {
-          result = await getBlob(upload.blobPath, { access: 'private' });
+          const result = await s3Client.send(new GetObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: upload.r2Key,
+          }));
+          response.writeHead(200, {
+            ...securityHeaders(),
+            'Content-Type': upload.contentType,
+            'X-Content-Type-Options': 'nosniff',
+            'Cache-Control': 'private, no-store',
+            ...(upload.contentType === 'application/pdf' ? { 'Content-Disposition': 'attachment' } : {}),
+          });
+          if (request.method === 'HEAD') return response.end();
+          Readable.fromWeb(result.Body).pipe(response);
+          return;
         } catch (error) {
-          console.error('Private upload could not be retrieved:', error);
-          return sendJson(response, 500, { error: 'The file could not be retrieved.' });
+          console.error('R2 object could not be retrieved:', error);
+          return sendJson(response, 404, { error: 'Not found.' });
         }
-        if (!result || result.statusCode !== 200) return sendJson(response, 404, { error: 'Not found.' });
-        response.writeHead(200, {
-          ...securityHeaders(),
-          'Content-Type': upload.contentType,
-          'X-Content-Type-Options': 'nosniff',
-          'Cache-Control': 'private, no-store',
-          ...(upload.contentType === 'application/pdf' ? { 'Content-Disposition': 'attachment' } : {}),
-        });
-        if (request.method === 'HEAD') return response.end();
-        Readable.fromWeb(result.stream).pipe(response);
-        return;
       }
       if (database.isRemoteDatabase) return sendJson(response, 404, { error: 'Not found.' });
     }
@@ -1153,69 +1199,66 @@ async function serveStatic(request, response, pathname, search = '') {
   }
 }
 
-async function handlePrivateBlobUpload(request, response) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+async function handleR2Upload(request, response) {
+  if (!r2Configured) {
     return sendJson(response, 503, { error: 'Persistent upload storage is not configured.' });
   }
   try {
-    const body = await readJson(request);
-    const result = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async (_pathname, clientPayload) => {
-        if (!hasSameOrigin(request) || !await hasValidSession(request)) {
-          throw new Error('Administrator authentication is required.');
-        }
-        let clientDetails;
-        try {
-          clientDetails = JSON.parse(clientPayload || '{}');
-        } catch {
-          throw new Error('Upload details are invalid.');
-        }
-        const originalName = safeOriginalName(clientDetails.fileName);
-        if (!originalName) throw new Error('A file name is required.');
-        return {
-          access: 'private',
-          allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
-          maximumSizeInBytes: MAX_UPLOAD_BYTES,
-          addRandomSuffix: true,
-          tokenPayload: JSON.stringify({ id: crypto.randomUUID(), originalName }),
-        };
-      },
-      onUploadCompleted: async ({ blob, tokenPayload }) => {
-        const metadata = JSON.parse(tokenPayload);
-        const stored = await getBlob(blob.pathname, { access: 'private' });
-        if (!stored || stored.statusCode !== 200) {
-          throw new Error('The uploaded file could not be verified.');
-        }
-        const chunks = [];
-        let size = 0;
-        for await (const chunk of Readable.fromWeb(stored.stream)) {
-          size += chunk.length;
-          if (size > MAX_UPLOAD_BYTES) throw new Error('Choose a file up to 5 MB.');
-          chunks.push(chunk);
-        }
-        const detected = detectUploadType(Buffer.concat(chunks));
-        if (!detected || detected.type !== blob.contentType) {
-          await deleteBlob(blob.pathname);
-          throw new Error('Only valid JPEG, PNG, WebP, or PDF files can be uploaded.');
-        }
-        await database.addPortfolioUpload({
-          id: metadata.id,
-          originalName: safeOriginalName(metadata.originalName),
-          contentType: detected.type,
-          fileSize: size,
-          uploadedAt: new Date().toISOString(),
-          blobPath: blob.pathname,
-        });
-      },
+    const payload = await readJson(request, MAX_UPLOAD_BODY_BYTES);
+    if (typeof payload?.content !== 'string' || payload.content.length > Math.ceil(MAX_UPLOAD_BYTES / 3) * 4 + 8
+      || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(payload.content)) {
+      return sendJson(response, 400, { error: 'Choose a valid JPEG, PNG, WebP image, or PDF file up to 5 MB.' });
+    }
+    const buffer = Buffer.from(payload.content, 'base64');
+    if (!buffer.length || buffer.length > MAX_UPLOAD_BYTES || buffer.toString('base64') !== payload.content) {
+      return sendJson(response, 400, { error: 'Choose a valid file up to 5 MB.' });
+    }
+    const detected = detectUploadType(buffer);
+    if (!detected) {
+      return sendJson(response, 400, { error: 'Only valid JPEG, PNG, WebP, or PDF files can be uploaded.' });
+    }
+    const id = crypto.randomUUID();
+    const fileName = `${id}.${detected.extension}`;
+    const originalName = safeOriginalName(payload.fileName);
+    if (!originalName) return sendJson(response, 400, { error: 'A file name is required.' });
+    const category = typeof payload.category === 'string' ? payload.category : 'general';
+    const isPublic = Boolean(payload.isPublic);
+
+    const r2Key = `portfolio/${id}/${fileName}`;
+    await s3Client.send(new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: r2Key,
+      Body: buffer,
+      ContentType: detected.type,
+      ContentDisposition: detected.type === 'application/pdf' ? 'attachment' : undefined,
+    }));
+
+    await database.addPortfolioUpload({
+      id,
+      originalName,
+      contentType: detected.type,
+      fileSize: buffer.length,
+      uploadedAt: new Date().toISOString(),
+      category,
+      isPublic,
+      r2Key,
     });
-    return sendJson(response, 200, result);
+    const publicUrl = R2_PUBLIC_URL ? `${R2_PUBLIC_URL.replace(/\/$/, '')}/${r2Key}` : undefined;
+    return sendJson(response, 201, {
+      id,
+      originalName,
+      contentType: detected.type,
+      fileSize: buffer.length,
+      category,
+      isPublic,
+      r2Key,
+      url: publicUrl || `/api/admin/uploads/${id}`,
+    });
   } catch (error) {
     if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
       return sendJson(response, 400, { error: error.message });
     }
-    console.error('Persistent portfolio upload failed:', error);
+    console.error('R2 portfolio upload failed:', error);
     return sendJson(response, 400, { error: 'The file could not be uploaded.' });
   }
 }
@@ -1798,11 +1841,11 @@ async function handleRequest(request, response) {
   if (pathname.startsWith('/api/admin/')) {
     const blobUploadRequest = request.method === 'POST'
       && pathname === '/api/admin/uploads'
-      && Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+      && r2Configured;
     if (request.method !== 'GET' && !blobUploadRequest && !hasSameOrigin(request)) {
       return sendJson(response, 403, { error: 'Request origin is not allowed.' });
     }
-    if (blobUploadRequest) return handlePrivateBlobUpload(request, response);
+    if (blobUploadRequest) return handleR2Upload(request, response);
 
     if (request.method === 'POST' && pathname === '/api/admin/forgot-password') {
       const address = clientAddress(request);
@@ -2017,11 +2060,10 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === 'POST' && pathname === '/api/admin/uploads') {
-      if (isProduction && !process.env.BLOB_READ_WRITE_TOKEN) {
+      if (isProduction && !r2Configured) {
         return sendJson(response, 503, { error: 'Persistent upload storage is not configured.' });
       }
       let uploadPath;
-      let blobPath;
       try {
         const payload = await readJson(request, MAX_UPLOAD_BODY_BYTES);
         if (typeof payload?.content !== 'string' || payload.content.length > Math.ceil(MAX_UPLOAD_BYTES / 3) * 4 + 8
@@ -2040,42 +2082,61 @@ async function handleRequest(request, response) {
         const fileName = `${id}.${detected.extension}`;
         const originalName = safeOriginalName(payload.fileName);
         if (!originalName) return sendJson(response, 400, { error: 'A file name is required.' });
-        if (process.env.BLOB_READ_WRITE_TOKEN) {
-          const blob = await putBlob(fileName, buffer, {
-            access: 'private',
-            addRandomSuffix: false,
-            contentType: detected.type,
-          });
-          blobPath = blob.pathname;
-        } else {
-          fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-          uploadPath = path.join(UPLOADS_DIR, fileName);
-          fs.writeFileSync(uploadPath, buffer, { flag: 'wx', mode: 0o644 });
-        }
-        await database.addPortfolioUpload({
-          id,
-          originalName,
-          contentType: detected.type,
-          fileSize: buffer.length,
-          uploadedAt: new Date().toISOString(),
-          ...(blobPath ? { blobPath } : {}),
-        });
-        return sendJson(response, 201, {
-          id,
-          originalName,
-          contentType: detected.type,
-          fileSize: buffer.length,
-          url: `/uploads/${fileName}`,
-        });
-      } catch (error) {
-        if (uploadPath) fs.rmSync(uploadPath, { force: true });
-        if (blobPath) {
-          try {
-            await deleteBlob(blobPath);
-          } catch (cleanupError) {
-            console.error('Uploaded portfolio file could not be removed after a database error:', cleanupError);
+        const category = typeof payload.category === 'string' ? payload.category : 'general';
+        const isPublic = Boolean(payload.isPublic);
+        let r2Key;
+        let uploadPath;
+        try {
+          if (r2Configured) {
+            r2Key = `portfolio/${id}/${fileName}`;
+            await s3Client.send(new PutObjectCommand({
+              Bucket: R2_BUCKET_NAME,
+              Key: r2Key,
+              Body: buffer,
+              ContentType: detected.type,
+              ContentDisposition: detected.type === 'application/pdf' ? 'attachment' : undefined,
+            }));
+          } else {
+            fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+            uploadPath = path.join(UPLOADS_DIR, fileName);
+            fs.writeFileSync(uploadPath, buffer, { flag: 'wx', mode: 0o644 });
           }
+          await database.addPortfolioUpload({
+            id,
+            originalName,
+            contentType: detected.type,
+            fileSize: buffer.length,
+            uploadedAt: new Date().toISOString(),
+            category,
+            isPublic,
+            r2Key,
+          });
+          const publicUrl = R2_PUBLIC_URL && r2Key ? `${R2_PUBLIC_URL.replace(/\/$/, '')}/${r2Key}` : undefined;
+          return sendJson(response, 201, {
+            id,
+            originalName,
+            contentType: detected.type,
+            fileSize: buffer.length,
+            category,
+            isPublic,
+            r2Key,
+            url: publicUrl || (uploadPath ? `/uploads/${fileName}` : `/api/admin/uploads/${id}`),
+          });
+        } catch (error) {
+          if (uploadPath) fs.rmSync(uploadPath, { force: true });
+          if (r2Key) {
+            try {
+              await s3Client.send(new DeleteObjectCommand({
+                Bucket: R2_BUCKET_NAME,
+                Key: r2Key,
+              }));
+            } catch (cleanupError) {
+              console.error('Uploaded portfolio file could not be removed after a database error:', cleanupError);
+            }
+          }
+          throw error;
         }
+      } catch (error) {
         if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
           return sendJson(response, 400, { error: error.message });
         }
@@ -2092,8 +2153,24 @@ async function handleRequest(request, response) {
         if (!upload) return sendJson(response, 404, { error: 'Upload not found.' });
         const extension = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' }[upload.contentType];
         if (!extension) return sendJson(response, 500, { error: 'Upload type is invalid.' });
-        if (upload.blobPath) await deleteBlob(upload.blobPath);
-        else await fs.promises.rm(path.join(UPLOADS_DIR, `${upload.id}.${extension}`), { force: true });
+        if (upload.r2Key) {
+          try {
+            await s3Client.send(new DeleteObjectCommand({
+              Bucket: R2_BUCKET_NAME,
+              Key: upload.r2Key,
+            }));
+          } catch (deleteError) {
+            console.error('R2 object could not be deleted:', deleteError);
+          }
+        } else if (upload.blobPath) {
+          try {
+            await fs.promises.rm(path.join(UPLOADS_DIR, `${upload.id}.${extension}`), { force: true });
+          } catch {
+            // Ignore if file was already deleted
+          }
+        } else {
+          await fs.promises.rm(path.join(UPLOADS_DIR, `${upload.id}.${extension}`), { force: true });
+        }
         const result = await database.deletePortfolioUpload(upload.id);
         if (!result.changes) return sendJson(response, 404, { error: 'Upload not found.' });
         return sendJson(response, 200, { deleted: true });
