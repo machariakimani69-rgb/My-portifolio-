@@ -1304,7 +1304,7 @@ button:focus-visible {
 		right: 0;
 		left: 0;
 		bottom: 0;
-		z-index: 90;
+		z-index: 1000;
 		display: none;
 		grid-column: auto;
 		grid-row: auto;
