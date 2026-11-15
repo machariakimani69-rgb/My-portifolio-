@@ -222,6 +222,7 @@ const setMenuOpen = (isOpen) => {
 	if (!menuButton || !navigation) return;
 
 	navigation.classList.toggle('open', isOpen);
+	document.body.classList.toggle('menu-open', isOpen);
 	menuButton.setAttribute('aria-expanded', String(isOpen));
 	menuButton.setAttribute(
 		'aria-label',

@@ -605,22 +605,27 @@ button:focus-visible {
 	}
 
 	.nav-links {
-		position: absolute;
-		top: calc(100% - 4px);
+		position: fixed;
+		top: 64px;
 		right: 0;
 		left: 0;
-		z-index: 2;
+		bottom: 0;
+		z-index: 90;
 		display: none;
 		grid-column: auto;
 		grid-row: auto;
 		grid-template-columns: 1fr;
 		width: 100%;
+		max-width: none;
 		gap: 4px;
-		padding: 12px;
-		border: 1px solid var(--line);
-		border-radius: 6px;
-		background: var(--panel);
-		box-shadow: 0 12px 28px var(--shadow-deep);
+		padding: 16px 20px 24px;
+		border: 0;
+		border-radius: 0;
+		background: var(--bg);
+		color: var(--ink);
+		box-shadow: none;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.nav-links.open {
@@ -629,15 +634,9 @@ button:focus-visible {
 
 	.nav-links a {
 		justify-content: flex-start;
-		padding: 8px 10px;
-		font-size: 0.88rem;
-	}
-
-	.nav-links a.active::after {
-		right: auto;
-		bottom: 4px;
-		left: 10px;
-		width: 22px;
+		width: 100%;
+		padding: 14px 12px;
+		font-size: 0.95rem;
 	}
 
 	.theme-toggle {
