@@ -5,8 +5,6 @@ const http = require('node:http');
 const { Readable } = require('node:stream');
 const { promisify } = require('node:util');
 const bcrypt = require('bcryptjs');
-const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
@@ -61,22 +59,13 @@ const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
 
-// Cloudflare R2 configuration
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '';
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || '';
-const R2_ENDPOINT = process.env.R2_ENDPOINT || '';
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
-const r2Configured = Boolean(R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME && R2_ENDPOINT);
-
-const s3Client = r2Configured ? new S3Client({
-  region: 'auto',
-  endpoint: R2_ENDPOINT,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID,
-    secretAccessKey: R2_SECRET_ACCESS_KEY,
-  },
-}) : null;
+// Local file storage configuration (temporary — Render filesystem is ephemeral)
+// WARNING: Files stored under uploads/ may be lost after service redeployment or restart.
+// This is intentional until a persistent object storage provider (e.g. Supabase Storage)
+// is configured. Document metadata remains in the Turso database regardless.
+const localStorageConfigured = true;
+const LOCAL_STORAGE_WARNING = 'Local file storage is temporary: uploaded documents may be lost after service redeployment or restart. Use a persistent object storage provider for production.';
+console.warn(LOCAL_STORAGE_WARNING);
 const corsAllowedOrigins = new Set((process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
   .map((origin) => origin.trim())
@@ -1156,12 +1145,12 @@ async function serveStatic(request, response, pathname, search = '') {
       if (path.extname(canonicalRelativePath).toLowerCase() !== expectedExtension) {
         return sendJson(response, 404, { error: 'Not found.' });
       }
-      if (upload.r2Key && r2Configured) {
+      if (upload.r2Key) {
+        // Local file storage: file is stored under uploads/<id>.<ext>
+        const localFilePath = path.join(UPLOADS_DIR, `${upload.id}.${extension}`);
         try {
-          const result = await s3Client.send(new GetObjectCommand({
-            Bucket: R2_BUCKET_NAME,
-            Key: upload.r2Key,
-          }));
+          const stats = await fs.promises.stat(localFilePath);
+          if (!stats.isFile()) return sendJson(response, 404, { error: 'Not found.' });
           response.writeHead(200, {
             ...securityHeaders(),
             'Content-Type': upload.contentType,
@@ -1170,10 +1159,10 @@ async function serveStatic(request, response, pathname, search = '') {
             ...(upload.contentType === 'application/pdf' ? { 'Content-Disposition': 'attachment' } : {}),
           });
           if (request.method === 'HEAD') return response.end();
-          Readable.fromWeb(result.Body).pipe(response);
+          fs.createReadStream(localFilePath).pipe(response);
           return;
         } catch (error) {
-          console.error('R2 object could not be retrieved:', error);
+          console.error('Local file could not be retrieved:', error);
           return sendJson(response, 404, { error: 'Not found.' });
         }
       }
@@ -1199,10 +1188,7 @@ async function serveStatic(request, response, pathname, search = '') {
   }
 }
 
-async function handleR2Upload(request, response) {
-  if (!r2Configured) {
-    return sendJson(response, 503, { error: 'Persistent upload storage is not configured.' });
-  }
+async function handleLocalUpload(request, response) {
   try {
     const payload = await readJson(request, MAX_UPLOAD_BODY_BYTES);
     if (typeof payload?.content !== 'string' || payload.content.length > Math.ceil(MAX_UPLOAD_BYTES / 3) * 4 + 8
@@ -1224,14 +1210,10 @@ async function handleR2Upload(request, response) {
     const category = typeof payload.category === 'string' ? payload.category : 'general';
     const isPublic = Boolean(payload.isPublic);
 
-    const r2Key = `portfolio/${id}/${fileName}`;
-    await s3Client.send(new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: r2Key,
-      Body: buffer,
-      ContentType: detected.type,
-      ContentDisposition: detected.type === 'application/pdf' ? 'attachment' : undefined,
-    }));
+    // WARNING: Local file storage is temporary. Files may be lost after redeployment or restart.
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    const localFilePath = path.join(UPLOADS_DIR, fileName);
+    fs.writeFileSync(localFilePath, buffer, { flag: 'wx', mode: 0o644 });
 
     await database.addPortfolioUpload({
       id,
@@ -1241,9 +1223,9 @@ async function handleR2Upload(request, response) {
       uploadedAt: new Date().toISOString(),
       category,
       isPublic,
-      r2Key,
+      r2Key: fileName,
     });
-    const publicUrl = R2_PUBLIC_URL ? `${R2_PUBLIC_URL.replace(/\/$/, '')}/${r2Key}` : undefined;
+
     return sendJson(response, 201, {
       id,
       originalName,
@@ -1251,14 +1233,14 @@ async function handleR2Upload(request, response) {
       fileSize: buffer.length,
       category,
       isPublic,
-      r2Key,
-      url: publicUrl || `/api/admin/uploads/${id}`,
+      r2Key: fileName,
+      url: `/api/admin/uploads/${id}`,
     });
   } catch (error) {
     if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
       return sendJson(response, 400, { error: error.message });
     }
-    console.error('R2 portfolio upload failed:', error);
+    console.error('Local portfolio upload failed:', error);
     return sendJson(response, 400, { error: 'The file could not be uploaded.' });
   }
 }
@@ -1839,13 +1821,12 @@ async function handleRequest(request, response) {
   }
 
   if (pathname.startsWith('/api/admin/')) {
-    const blobUploadRequest = request.method === 'POST'
-      && pathname === '/api/admin/uploads'
-      && r2Configured;
-    if (request.method !== 'GET' && !blobUploadRequest && !hasSameOrigin(request)) {
+    const localUploadRequest = request.method === 'POST'
+      && pathname === '/api/admin/uploads';
+    if (request.method !== 'GET' && !localUploadRequest && !hasSameOrigin(request)) {
       return sendJson(response, 403, { error: 'Request origin is not allowed.' });
     }
-    if (blobUploadRequest) return handleR2Upload(request, response);
+    if (localUploadRequest) return handleLocalUpload(request, response);
 
     if (request.method === 'POST' && pathname === '/api/admin/forgot-password') {
       const address = clientAddress(request);
@@ -2059,92 +2040,6 @@ async function handleRequest(request, response) {
       }
     }
 
-    if (request.method === 'POST' && pathname === '/api/admin/uploads') {
-      if (isProduction && !r2Configured) {
-        return sendJson(response, 503, { error: 'Persistent upload storage is not configured.' });
-      }
-      let uploadPath;
-      try {
-        const payload = await readJson(request, MAX_UPLOAD_BODY_BYTES);
-        if (typeof payload?.content !== 'string' || payload.content.length > Math.ceil(MAX_UPLOAD_BYTES / 3) * 4 + 8
-          || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(payload.content)) {
-          return sendJson(response, 400, { error: 'Choose a valid JPEG, PNG, WebP image, or PDF file up to 5 MB.' });
-        }
-        const buffer = Buffer.from(payload.content, 'base64');
-        if (!buffer.length || buffer.length > MAX_UPLOAD_BYTES || buffer.toString('base64') !== payload.content) {
-          return sendJson(response, 400, { error: 'Choose a valid file up to 5 MB.' });
-        }
-        const detected = detectUploadType(buffer);
-        if (!detected) {
-          return sendJson(response, 400, { error: 'Only valid JPEG, PNG, WebP, or PDF files can be uploaded.' });
-        }
-        const id = crypto.randomUUID();
-        const fileName = `${id}.${detected.extension}`;
-        const originalName = safeOriginalName(payload.fileName);
-        if (!originalName) return sendJson(response, 400, { error: 'A file name is required.' });
-        const category = typeof payload.category === 'string' ? payload.category : 'general';
-        const isPublic = Boolean(payload.isPublic);
-        let r2Key;
-        let uploadPath;
-        try {
-          if (r2Configured) {
-            r2Key = `portfolio/${id}/${fileName}`;
-            await s3Client.send(new PutObjectCommand({
-              Bucket: R2_BUCKET_NAME,
-              Key: r2Key,
-              Body: buffer,
-              ContentType: detected.type,
-              ContentDisposition: detected.type === 'application/pdf' ? 'attachment' : undefined,
-            }));
-          } else {
-            fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-            uploadPath = path.join(UPLOADS_DIR, fileName);
-            fs.writeFileSync(uploadPath, buffer, { flag: 'wx', mode: 0o644 });
-          }
-          await database.addPortfolioUpload({
-            id,
-            originalName,
-            contentType: detected.type,
-            fileSize: buffer.length,
-            uploadedAt: new Date().toISOString(),
-            category,
-            isPublic,
-            r2Key,
-          });
-          const publicUrl = R2_PUBLIC_URL && r2Key ? `${R2_PUBLIC_URL.replace(/\/$/, '')}/${r2Key}` : undefined;
-          return sendJson(response, 201, {
-            id,
-            originalName,
-            contentType: detected.type,
-            fileSize: buffer.length,
-            category,
-            isPublic,
-            r2Key,
-            url: publicUrl || (uploadPath ? `/uploads/${fileName}` : `/api/admin/uploads/${id}`),
-          });
-        } catch (error) {
-          if (uploadPath) fs.rmSync(uploadPath, { force: true });
-          if (r2Key) {
-            try {
-              await s3Client.send(new DeleteObjectCommand({
-                Bucket: R2_BUCKET_NAME,
-                Key: r2Key,
-              }));
-            } catch (cleanupError) {
-              console.error('Uploaded portfolio file could not be removed after a database error:', cleanupError);
-            }
-          }
-          throw error;
-        }
-      } catch (error) {
-        if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
-          return sendJson(response, 400, { error: error.message });
-        }
-        console.error('Portfolio file could not be uploaded:', error);
-        return sendJson(response, 500, { error: 'Portfolio file could not be uploaded.' });
-      }
-    }
-
     const uploadRoute = pathname.match(/^\/api\/admin\/uploads\/([0-9a-f-]{36})$/i);
     if (uploadRoute && request.method === 'DELETE') {
       try {
@@ -2154,13 +2049,12 @@ async function handleRequest(request, response) {
         const extension = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' }[upload.contentType];
         if (!extension) return sendJson(response, 500, { error: 'Upload type is invalid.' });
         if (upload.r2Key) {
+          // Local file storage: delete from uploads/<id>.<ext>
+          const localFilePath = path.join(UPLOADS_DIR, `${upload.id}.${extension}`);
           try {
-            await s3Client.send(new DeleteObjectCommand({
-              Bucket: R2_BUCKET_NAME,
-              Key: upload.r2Key,
-            }));
-          } catch (deleteError) {
-            console.error('R2 object could not be deleted:', deleteError);
+            await fs.promises.rm(localFilePath, { force: true });
+          } catch {
+            // Ignore if file was already deleted
           }
         } else if (upload.blobPath) {
           try {
