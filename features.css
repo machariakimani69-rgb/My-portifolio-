@@ -706,6 +706,10 @@ button:focus-visible {
 	}
 }
 
+#mobileNavOverlay {
+	display: none;
+}
+
 @media (max-width: 700px) {
 	.container {
 		width: min(100% - 32px, 540px);

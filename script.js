@@ -8,7 +8,6 @@ const mobileNavOverlay = document.createElement('nav');
 mobileNavOverlay.id = 'mobileNavOverlay';
 mobileNavOverlay.className = 'mobile-nav-overlay';
 mobileNavOverlay.setAttribute('aria-label', 'Mobile navigation');
-mobileNavOverlay.hidden = true;
 document.body.appendChild(mobileNavOverlay);
 
 const readSavedTheme = () => {
@@ -230,7 +229,6 @@ const setMenuOpen = (isOpen) => {
 
 	navigation.classList.toggle('open', isOpen);
 	mobileNavOverlay.classList.toggle('open', isOpen);
-	mobileNavOverlay.hidden = !isOpen;
 	document.body.classList.toggle('menu-open', isOpen);
 	menuButton.setAttribute('aria-expanded', String(isOpen));
 	menuButton.setAttribute(
