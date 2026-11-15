@@ -738,6 +738,47 @@ button:focus-visible {
 		display: grid;
 	}
 
+	#mobileNavOverlay {
+		position: fixed;
+		top: 64px;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 9999;
+		display: none;
+		grid-template-columns: minmax(0, 1fr);
+		width: 100%;
+		max-width: none;
+		padding: 16px 20px 24px;
+		border: 0;
+		border-radius: 0;
+		background: var(--bg);
+		color: var(--ink);
+		box-shadow: none;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	#mobileNavOverlay.open {
+		display: grid;
+	}
+
+	#mobileNavOverlay a {
+		justify-content: flex-start;
+		width: 100%;
+		padding: 10px 0;
+		font-size: 0.88rem;
+		color: var(--ink);
+		text-decoration: none;
+		border-radius: var(--radius-sm);
+	}
+
+	#mobileNavOverlay a:hover,
+	#mobileNavOverlay a.active {
+		color: var(--primary);
+		background: rgba(0, 212, 255, 0.05);
+	}
+
 	.nav-links a {
 		justify-content: flex-start;
 		width: 100%;

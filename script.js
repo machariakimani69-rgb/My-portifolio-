@@ -4,6 +4,13 @@ const menuButton = document.querySelector('#menuToggle');
 const navigation = document.querySelector('#navLinks');
 const navigationLinks = [...document.querySelectorAll('#navLinks a[data-page]')];
 
+const mobileNavOverlay = document.createElement('nav');
+mobileNavOverlay.id = 'mobileNavOverlay';
+mobileNavOverlay.className = 'mobile-nav-overlay';
+mobileNavOverlay.setAttribute('aria-label', 'Mobile navigation');
+mobileNavOverlay.hidden = true;
+document.body.appendChild(mobileNavOverlay);
+
 const readSavedTheme = () => {
 	try {
 		return localStorage.getItem('portfolio-theme');
@@ -222,12 +229,23 @@ const setMenuOpen = (isOpen) => {
 	if (!menuButton || !navigation) return;
 
 	navigation.classList.toggle('open', isOpen);
+	mobileNavOverlay.classList.toggle('open', isOpen);
+	mobileNavOverlay.hidden = !isOpen;
 	document.body.classList.toggle('menu-open', isOpen);
 	menuButton.setAttribute('aria-expanded', String(isOpen));
 	menuButton.setAttribute(
 		'aria-label',
 		isOpen ? 'Close navigation menu' : 'Open navigation menu'
 	);
+
+	if (isOpen) {
+		mobileNavOverlay.replaceChildren(
+			...navigation.querySelectorAll('a[data-page]').map((link) => link.cloneNode(true))
+		);
+		mobileNavOverlay.querySelectorAll('a').forEach((link) => {
+			link.addEventListener('click', () => setMenuOpen(false));
+		});
+	}
 };
 
 if (menuButton && navigation) {
@@ -237,7 +255,11 @@ if (menuButton && navigation) {
 	});
 
 	document.addEventListener('click', (event) => {
-		if (!navigation.contains(event.target) && !menuButton.contains(event.target)) {
+		if (
+			!navigation.contains(event.target) &&
+			!menuButton.contains(event.target) &&
+			!mobileNavOverlay.contains(event.target)
+		) {
 			setMenuOpen(false);
 		}
 	});
