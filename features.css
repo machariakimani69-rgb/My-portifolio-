@@ -712,20 +712,26 @@ button:focus-visible {
 	}
 
 	.nav-links {
-		top: calc(100% - 4px);
+		position: fixed;
+		top: 64px;
 		right: 0;
 		left: 0;
-		z-index: 2;
+		bottom: 0;
+		z-index: 90;
 		display: none;
 		grid-column: auto;
 		grid-row: auto;
 		grid-template-columns: minmax(0, 1fr);
 		width: 100%;
-		padding: 12px;
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		background: var(--panel);
-		box-shadow: 0 20px 50px var(--shadow);
+		max-width: none;
+		padding: 16px 20px 24px;
+		border: 0;
+		border-radius: 0;
+		background: var(--bg);
+		color: var(--ink);
+		box-shadow: none;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.nav-links.open {
