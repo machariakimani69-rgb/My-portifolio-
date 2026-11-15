@@ -750,7 +750,6 @@ button:focus-visible {
 		bottom: 0;
 		z-index: 9999;
 		display: none;
-		grid-template-columns: minmax(0, 1fr);
 		width: 100%;
 		max-width: none;
 		padding: 16px 20px 24px;
@@ -764,7 +763,8 @@ button:focus-visible {
 	}
 
 	#mobileNavOverlay.open {
-		display: grid;
+		display: flex;
+		flex-direction: column;
 	}
 
 	#mobileNavOverlay a {
