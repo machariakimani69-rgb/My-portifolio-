@@ -238,7 +238,10 @@ const setMenuOpen = (isOpen) => {
 
 	if (isOpen) {
 		mobileNavOverlay.replaceChildren(
-			...navigation.querySelectorAll('a[data-page]').map((link) => link.cloneNode(true))
+			...Array.from(
+				navigation.querySelectorAll('a[data-page]'),
+				(link) => link.cloneNode(true)
+			)
 		);
 		mobileNavOverlay.querySelectorAll('a').forEach((link) => {
 			link.addEventListener('click', () => setMenuOpen(false));
