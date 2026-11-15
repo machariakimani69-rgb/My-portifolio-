@@ -1140,7 +1140,450 @@ function addLocalPortfolioTools() {
     .catch((error) => console.warn(error.message));
 }
 
-addAnalyticsConsent();
+function addWelcomeAnimation() {
+	const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const shown = sessionStorage.getItem('portfolio-welcome-shown');
+	if (reduced || shown === 'true') return;
+
+	const overlay = document.createElement('div');
+	overlay.className = 'welcome-overlay';
+	overlay.innerHTML = `
+		<div class="balloons" id="welcomeBalloons"></div>
+		<div class="confetti" id="welcomeConfetti"></div>
+		<div class="welcome-content">
+			<h1>Welcome to <span>David Kimani's</span> Portfolio</h1>
+			<p>Explore projects, skills, and achievements</p>
+		</div>
+	`;
+	document.body.insertBefore(overlay, document.body.firstChild);
+
+	const balloonContainer = overlay.querySelector('#welcomeBalloons');
+	const confettiContainer = overlay.querySelector('#welcomeConfetti');
+
+	const colors = ['#ff6b6b', '#4ecdc4', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9ff3', '#feca57'];
+	for (let i = 0; i < 10; i++) {
+		const b = document.createElement('div');
+		b.className = 'balloon';
+		b.style.left = Math.random() * 90 + 5 + '%';
+		b.style.background = colors[Math.floor(Math.random() * colors.length)];
+		b.style.animationDelay = Math.random() * 3 + 's';
+		b.style.animationDuration = (3 + Math.random() * 2) + 's';
+		balloonContainer.appendChild(b);
+	}
+
+	for (let i = 0; i < 40; i++) {
+		const p = document.createElement('div');
+		p.className = 'confetti-piece';
+		p.style.left = Math.random() * 100 + '%';
+		p.style.top = Math.random() * -50 + 'px';
+		p.style.background = colors[Math.floor(Math.random() * colors.length)];
+		p.style.animationDelay = Math.random() * 3 + 's';
+		p.style.animationDuration = (2 + Math.random() * 2) + 's';
+		confettiContainer.appendChild(p);
+	}
+
+	setTimeout(() => {
+		overlay.classList.add('hidden');
+		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+	}, 4500);
+
+	setTimeout(() => overlay.remove(), 5200);
+}
+
+function addAnimatedIntroduction() {
+	const tagline = document.querySelector('#portfolioTagline');
+	const typingContainer = document.querySelector('#typingEffect');
+	if (!tagline || !typingContainer) return;
+
+	const roles = ['Software Engineer', 'Web Developer', 'Computer Science Student'];
+	let roleIndex = 0;
+	let charIndex = 0;
+	let isDeleting = false;
+	let typeSpeed = 60;
+
+	tagline.textContent = roles[0];
+
+	function type() {
+		const current = roles[roleIndex];
+		if (isDeleting) {
+			typingContainer.textContent = current.substring(0, charIndex - 1);
+			charIndex--;
+		} else {
+			typingContainer.textContent = current.substring(0, charIndex + 1);
+			charIndex++;
+		}
+
+		if (!isDeleting && charIndex === current.length) {
+			isDeleting = true;
+			typeSpeed = 1500;
+		} else if (isDeleting && charIndex === 0) {
+			isDeleting = false;
+			roleIndex = (roleIndex + 1) % roles.length;
+			typeSpeed = 500;
+		} else {
+			typeSpeed = isDeleting ? 30 : 80;
+		}
+
+		setTimeout(type, typeSpeed);
+	}
+
+	type();
+}
+
+function addFloatingTechIcons() {
+	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+	const container = document.createElement('div');
+	container.className = 'floating-icons';
+
+	const techIcons = [
+		{ name: 'html', label: 'HTML' },
+		{ name: 'css', label: 'CSS' },
+		{ name: 'javascript', label: 'JavaScript' },
+		{ name: 'python', label: 'Python' },
+		{ name: 'github', label: 'GitHub' },
+		{ name: 'code-2', label: 'Code' },
+		{ name: 'terminal', label: 'Terminal' },
+		{ name: 'cpu', label: 'CPU' },
+	];
+
+	const positions = [
+		{ top: '8%', left: '5%' }, { top: '15%', left: '90%' }, { top: '28%', left: '10%' },
+		{ top: '45%', left: '85%' }, { top: '58%', left: '15%' }, { top: '72%', left: '80%' },
+		{ top: '85%', left: '8%' }, { top: '92%', left: '88%' },
+	];
+
+	techIcons.forEach((tech, i) => {
+		const icon = document.createElement('div');
+		icon.className = 'floating-icon';
+		icon.title = tech.label;
+		icon.style.top = positions[i]?.top || (Math.random() * 80 + 10) + '%';
+		icon.style.left = positions[i]?.left || (Math.random() * 80 + 10) + '%';
+		icon.style.animationDuration = (5 + Math.random() * 4) + 's';
+		icon.style.animationDelay = (Math.random() * 3) + 's';
+		icon.style.opacity = 0.4 + Math.random() * 0.3;
+
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.setAttribute('viewBox', '0 0 24 24');
+		svg.innerHTML = getTechIconPath(tech.name);
+		icon.appendChild(svg);
+		container.appendChild(icon);
+	});
+
+	document.body.insertBefore(container, document.body.firstChild);
+}
+
+function getTechIconPath(name) {
+	const paths = {
+		html: '<path d="M12 2L3 7l9 5 9-5z"/><path d="M12 17L3 12l9-5 9 5z"/><path d="M12 22L3 17l9-5 9 5z"/>',
+		css: '<circle cx="12" cy="12" r="10"/><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 4.477 2 12 2z"/><path d="M2 12h20"/><path d="M12 2v20"/>',
+		javascript: '<path d="M13.2 16H13V13H9.2V16H9V13H5V10H9V7H13V10H17V13H13Z"/><path d="M11.2 6H5V3H17V6H11.2Z"/><rect x="11.2" y="6" width="1.4" height="12" rx="0.7"/>',
+		python: '<path d="M16.5 5c-1.121-1.65-2.473-2.5-3.5-2.5-0.697 0-1.289 0.29-1.733 0.767"/><path d="M8.383 13.5c-0.444-0.477-0.7-0.975-0.7-1.5s0.256-1.023 0.7-1.5l2-2c0.89-0.89 2.11-0.89 3 0"/><path d="M12 18.5c-1.121-1.65-2.473-2.5-3.5-2.5-0.697 0-1.289 0.29-1.733 0.767"/><path d="M14.617 7.5c0.444-0.477 0.7-0.975 0.7-1.5s-0.256-1.023-0.7-1.5l-2 2c-0.89 0.89-2.11 0.89-3 0"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>',
+		github: '<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-0.94-2.61c3.14-3.56 2.19-8.16-2.19-8.16-0.42-0.72-0.93-1.01-1.8-0.56-0.2-0.11-0.41-0.05-0.41-0.05-0.77-0.05-1.48 0.2-1.48 0.2-0.37-0.27-0.92-0.2-1.48 0.2-0.47 0-0.94 0.16-1.48 0.45-0.4-0.2-0.8-0.35-1.22-0.58-0.35-0.14-0.73-0.09-1.09 0.13-0.33 0.2-0.49 0.51-0.34 0.87 0.18 0.44 0.5 0.77 0.89 0.97 0.27 0.11 0.58 0.15 0.87 0.15 0.44 0 0.87-0.05 1.28-0.15 0.39-0.1 0.77-0.23 1.16-0.37 0.39-0.14 0.77-0.3 1.16-0.46 0.77-0.32 1.55-0.64 2.34-0.96 0.77-0.32 1.55-0.64 2.34-0.96 0.39-0.14 0.77-0.3 1.16-0.46 0.39-0.15 0.77-0.3 1.16-0.46 0.77-0.32 1.55-0.64 2.34-0.96 0.39-0.14 0.77-0.3 1.16-0.46 0.39-0.15 0.77-0.3 1.16-0.46 0.39-0.14 0.77-0.3 1.16-0.46 0.39-0.15 0.77-0.3 1.16-0.46"/><circle cx="12" cy="16" r="4" fill="none" stroke="currentColor" stroke-width="2"/>',
+		'code-2': '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+		terminal: '<polyline points="4 17 10 17 4 12"/><line x1="12" y1="19" x2="20" y2="19"/>',
+		cpu: '<rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><circle cx="9" cy="9" r="2"/><circle cx="15" cy="9" r="2"/><circle cx="9" cy="15" r="2"/><circle cx="15" cy="15" r="2"/>',
+	};
+
+	return paths[name] || paths['code-2'];
+}
+
+function addCustomCursor() {
+	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	if (!window.matchMedia('(pointer: fine) and (min-width: 769px)').matches) return;
+
+	const cursor = document.createElement('div');
+	cursor.className = 'custom-cursor';
+	document.body.appendChild(cursor);
+
+	let mouseX = 0, mouseY = 0;
+	let cursorX = 0, cursorY = 0;
+
+	const updateCursor = () => {
+		cursorX += (mouseX - cursorX) * 0.15;
+		cursorY += (mouseY - cursorY) * 0.15;
+		cursor.style.left = cursorX + 'px';
+		cursor.style.top = cursorY + 'px';
+		requestAnimationFrame(updateCursor);
+	};
+	requestAnimationFrame(updateCursor);
+
+	document.addEventListener('mousemove', (e) => {
+		mouseX = e.clientX;
+		mouseY = e.clientY;
+		cursor.classList.add('visible');
+	});
+
+	document.addEventListener('mousedown', () => {
+		cursor.style.width = '16px';
+		cursor.style.height = '16px';
+		cursor.style.borderWidth = '2px';
+	});
+
+	document.addEventListener('mouseup', () => {
+		cursor.style.width = '20px';
+		cursor.style.height = '20px';
+		cursor.style.borderWidth = '1.5px';
+	});
+
+	document.querySelectorAll('a, button, [role="button"], input, select, textarea, label, .skill-card, .project-card, .focus-item').forEach((el) => {
+		el.addEventListener('mouseenter', () => cursor.style.opacity = '0');
+		el.addEventListener('mouseleave', () => cursor.style.opacity = '1');
+	});
+}
+
+function addAchievementCounters() {
+	const existing = document.querySelector('.achievement-counters');
+	if (existing) return;
+
+	const countersContainer = document.createElement('section');
+	countersContainer.className = 'achievement-counters';
+	countersContainer.setAttribute('aria-label', 'Portfolio achievements');
+
+	const certificatesCount = document.querySelectorAll('.certificate-list article').length || 0;
+	const projectsCount = document.querySelectorAll('#portfolioProjects .project-card').length || 0;
+
+	const stats = [
+		{ value: Math.max(certificatesCount, 0), label: 'Certificates' },
+		{ value: Math.max(projectsCount, 0), label: 'Projects' },
+		{ value: 2024, label: 'Studies Since' },
+		{ value: 1, label: 'Portfolio' },
+	];
+
+	stats.forEach((stat) => {
+		const card = document.createElement('article');
+		card.className = 'achievement-card';
+		card.innerHTML = `
+			<span class="counter-value" data-target="${stat.value}">0</span>
+			<p class="counter-label">${stat.label}</p>
+		`;
+		countersContainer.appendChild(card);
+	});
+
+	const hero = document.querySelector('#home .container');
+	if (hero) {
+		hero.appendChild(countersContainer);
+	} else {
+		document.querySelector('main')?.appendChild(countersContainer);
+	}
+
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach((entry) => {
+			if (!entry.isIntersecting) return;
+			const counter = entry.target.querySelector('.counter-value');
+			const target = Number(counter.dataset.target);
+			let current = 0;
+			const duration = 1500;
+			const increment = target / (duration / 16);
+			const timer = setInterval(() => {
+				current += increment;
+				if (current >= target) {
+					counter.textContent = String(target);
+					clearInterval(timer);
+				} else {
+					counter.textContent = String(Math.floor(current));
+				}
+			}, 16);
+			observer.unobserve(entry.target);
+		});
+	}, { threshold: 0.3 });
+
+	observer.observe(countersContainer);
+}
+
+function addPortfolioAssistant() {
+	const assistantKey = 'portfolio-assistant-dismissed';
+	if (sessionStorage.getItem(assistantKey) === 'true') return;
+
+	const panel = document.createElement('div');
+	panel.className = 'portfolio-assistant';
+	panel.innerHTML = `
+		<button class="assistant-bubble" aria-label="Open portfolio assistant" title="Portfolio Assistant">
+			<svg viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 4.477 2 12 2z"/><path d="M12 16l-4-4m0 0l4-4m-4 4l4-4"/></svg>
+		</button>
+		<div class="assistant-panel">
+			<div class="assistant-header">
+				<h3>Portfolio Assistant</h3>
+				<button class="assistant-close" aria-label="Close assistant">×</button>
+			</div>
+			<div class="assistant-messages" id="assistantMessages">
+				<div class="assistant-message assistant">
+					Hi! I can answer questions about David's education, skills, projects, and certificates. What would you like to know?
+				</div>
+			</div>
+			<div class="assistant-input-area">
+				<input type="text" placeholder="Ask about David's portfolio..." autocomplete="off">
+				<button type="button">Ask</button>
+			</div>
+			<div class="assistant-hint">I answer based on public portfolio information only.</div>
+		</div>
+	`;
+
+	document.body.appendChild(panel);
+
+	const bubble = panel.querySelector('.assistant-bubble');
+	const panelEl = panel.querySelector('.assistant-panel');
+	const closeBtn = panel.querySelector('.assistant-close');
+	const messages = panel.querySelector('#assistantMessages');
+	const input = panel.querySelector('input');
+	const askBtn = panel.querySelector('button[type="button"]');
+
+	let isOpen = false;
+
+	bubble.addEventListener('click', () => {
+		isOpen = !isOpen;
+		panelEl.classList.toggle('open', isOpen);
+		if (isOpen) input.focus();
+	});
+
+	closeBtn.addEventListener('click', () => {
+		isOpen = false;
+		panelEl.classList.remove('open');
+		sessionStorage.setItem(assistantKey, 'true');
+	});
+
+	const addMessage = (text, type) => {
+		const div = document.createElement('div');
+		div.className = `assistant-message ${type}`;
+		div.textContent = text;
+		messages.appendChild(div);
+		messages.scrollTop = messages.scrollHeight;
+	};
+
+	const answerQuestion = (question) => {
+		const q = question.toLowerCase();
+		const portfolio = window.portfolioData || {};
+		const skills = portfolio.skills || ['HTML', 'CSS', 'JavaScript', 'Responsive Design', 'UI/UX Basics', 'Git & GitHub', 'Web Development'];
+		const projects = portfolio.projects || ['Portfolio Website', 'Business Landing Page', 'Task Manager App'];
+		const education = portfolio.education || [{ degree: 'BSc in Computer Science', school: 'University of Embu', years: '2024-2028' }];
+		const certificates = portfolio.certificates || [];
+
+		if (q.includes('skill') || q.includes('html') || q.includes('css') || q.includes('javascript') || q.includes('python') || q.includes('github')) {
+			addMessage(`David's skills include: ${skills.join(', ')}.`, 'assistant');
+		} else if (q.includes('project')) {
+			addMessage(`David's projects include: ${projects.join(', ')}.`, 'assistant');
+		} else if (q.includes('education') || q.includes('university') || q.includes('school') || q.includes('degree')) {
+			addMessage(`David is pursuing ${education[0]?.degree || 'BSc in Computer Science'} at ${education[0]?.school || 'University of Embu'} (${education[0]?.years || '2024-2028'}).`, 'assistant');
+		} else if (q.includes('certificate') || q.includes('badge')) {
+			if (certificates.length) {
+				addMessage(`Certificates: ${certificates.map(c => c.title).join(', ')}.`, 'assistant');
+			} else {
+				addMessage('Certificate information will appear here when available.', 'assistant');
+			}
+		} else if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
+			addMessage('Hello! I can help with questions about David\'s education, skills, projects, and certificates.', 'assistant');
+		} else {
+			addMessage('I can answer questions about David\'s education, skills, projects, and certificates. Try asking about his skills, education, or projects!', 'assistant');
+		}
+	};
+
+	const handleAsk = () => {
+		const text = input.value.trim();
+		if (!text) return;
+		addMessage(text, 'user');
+		input.value = '';
+		setTimeout(() => answerQuestion(text), 400);
+	};
+
+	askBtn.addEventListener('click', handleAsk);
+	input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAsk(); });
+}
+
+function addTestimonials() {
+	const testimonialsSection = document.createElement('section');
+	testimonialsSection.className = 'testimonial-section';
+	testimonialsSection.innerHTML = `
+		<h2>What People Say</h2>
+		<div class="testimonial-grid" id="testimonialGrid"></div>
+		<form class="testimonial-form" id="testimonialForm">
+			<h3>Share Your Recommendation</h3>
+			<label>Your name<input type="text" name="name" maxlength="100" autocomplete="name" required></label>
+			<label>Your message<textarea name="message" rows="4" maxlength="1000" minLength="2" required></textarea></label>
+			<button type="submit">Submit for Review</button>
+			<p class="testimonial-status" id="testimonialStatus"></p>
+		</form>
+	`;
+
+	const hero = document.querySelector('#home .container');
+	if (hero) {
+		hero.parentNode.insertBefore(testimonialsSection, hero.nextSibling);
+	} else {
+		document.querySelector('main')?.appendChild(testimonialsSection);
+	}
+
+	const grid = document.querySelector('#testimonialGrid');
+	const form = document.querySelector('#testimonialForm');
+	const status = document.querySelector('#testimonialStatus');
+
+	const loadTestimonials = async () => {
+		try {
+			const response = await window.portfolioApiFetch('/api/community/comment', {
+				method: 'GET',
+				cache: 'no-store',
+			});
+			if (!response.ok) return;
+			const comments = await response.json();
+			const approved = comments.filter(c => c.status === 'approved');
+			grid.innerHTML = '';
+			approved.forEach((comment) => {
+				const card = document.createElement('article');
+				card.className = 'testimonial-card';
+				card.innerHTML = `
+					<p>${escapeHtml(comment.message)}</p>
+					<div class="testimonial-author">
+						<strong>${escapeHtml(comment.displayName)}</strong>
+						<span>Visitor</span>
+					</div>
+				`;
+				grid.appendChild(card);
+			});
+		} catch {
+			grid.innerHTML = '';
+		}
+	};
+
+	const escapeHtml = (text) => {
+		const div = document.createElement('div');
+		div.textContent = text;
+		return div.innerHTML;
+	};
+
+	form.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const formData = new FormData(form);
+		const name = formData.get('name').trim();
+		const message = formData.get('message').trim();
+		const btn = form.querySelector('button[type="submit"]');
+
+		if (!name || !message) {
+			status.textContent = 'Please fill in all fields.';
+			return;
+		}
+
+		btn.disabled = true;
+		status.textContent = 'Submitting…';
+
+		try {
+			const response = await window.portfolioApiFetch('/api/community/comment', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ pageKey: 'index.html', message }),
+			});
+			if (!response.ok) throw new Error('Testimonial could not be submitted.');
+			form.reset();
+			status.textContent = 'Thank you! Your recommendation is pending admin review.';
+			setTimeout(() => { status.textContent = ''; }, 5000);
+			loadTestimonials();
+		} catch (error) {
+			status.textContent = error.message || 'Testimonial could not be submitted.';
+		} finally {
+			btn.disabled = false;
+		}
+	});
+
+	loadTestimonials();
+}
+
 addProfileEngagement();
 addInterestTracking();
 addScrollReveal();
