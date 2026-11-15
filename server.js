@@ -1053,15 +1053,6 @@ async function serveStatic(request, response, pathname, search = '') {
   }
 
   const isChartLibrary = decodedPath === '/vendor/chart.js';
-  const isBlobClient = decodedPath === '/blob-upload.js';
-  if (isBlobClient) {
-    response.writeHead(200, {
-      ...securityHeaders(),
-      'Content-Type': 'text/javascript; charset=utf-8',
-      'Cache-Control': 'no-store',
-    });
-    return response.end();
-  }
   if (decodedPath === '/portfolio-api-config.js') {
     const apiBaseUrl = process.env.PORTFOLIO_API_BASE_URL;
     if (!apiBaseUrl || !isValidApiBaseUrl(apiBaseUrl)) {
@@ -1081,7 +1072,6 @@ async function serveStatic(request, response, pathname, search = '') {
   }
   const relativePath = isChartLibrary
     ? path.join('node_modules', 'chart.js', 'dist', 'chart.umd.js')
-    : isBlobClient ? path.join('dist', 'blob-upload.js')
     : decodedPath === '/' ? 'index.html' : decodedPath.replace(/^\/+/, '');
   const filePath = path.resolve(ROOT, relativePath);
   if (!filePath.startsWith(`${ROOT}${path.sep}`)) return sendJson(response, 404, { error: 'Not found.' });

@@ -196,7 +196,7 @@
               <div class="extensions-actions"><button class="button button-primary" id="saveExtensions" type="button"><i data-lucide="save" aria-hidden="true"></i>Save site settings</button><button class="button button-secondary" id="refreshExtensions" type="button"><i data-lucide="refresh-cw" aria-hidden="true"></i>Refresh tools</button></div>
               <p class="form-message" id="extensionsMessage" role="status" aria-live="polite"></p>
               <section class="extensions-section">
-                <h3>Document uploads</h3><p class="muted">JPEG, PNG, WebP, or PDF · maximum 5 MB. Stored in persistent cloud storage. Public documents are viewable by anyone; private documents require visitor sign-in.</p>
+                <h3>Document uploads</h3><p class="muted">JPEG, PNG, WebP, or PDF · maximum 5 MB. <strong style="color: var(--primary);">Stored temporarily on this server — files may be lost after service restart or redeployment.</strong> Public documents are viewable by anyone; private documents require visitor sign-in.</p>
                 <div class="upload-controls">
                   <input id="uploadFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
                   <label>Category
@@ -375,7 +375,6 @@
     <script src="portfolio-api.js" defer></script>
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <script src="/vendor/chart.js" defer></script>
-    <script src="/blob-upload.js" defer></script>
     <script src="admin.js" defer></script>
   </body>
 </html>

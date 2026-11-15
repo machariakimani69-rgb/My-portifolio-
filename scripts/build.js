@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const esbuild = require('esbuild');
 
 const projectDirectory = path.join(__dirname, '..');
 const outputDirectory = path.join(projectDirectory, 'dist');
@@ -48,12 +47,3 @@ fs.copyFileSync(
   path.join(projectDirectory, 'node_modules', 'chart.js', 'dist', 'chart.umd.js'),
   chartOutput,
 );
-
-esbuild.buildSync({
-  entryPoints: [path.join(__dirname, 'blob-upload-entry.js')],
-  outfile: path.join(outputDirectory, 'blob-upload.js'),
-  bundle: true,
-  format: 'iife',
-  platform: 'browser',
-  target: ['es2020'],
-});
