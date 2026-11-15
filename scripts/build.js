@@ -20,7 +20,7 @@ for (const name of [...staticPages, ...browserScripts]) {
   fs.copyFileSync(path.join(projectDirectory, name), path.join(outputDirectory, name));
 }
 
-for (const directory of ['assets', 'myimages']) {
+for (const directory of ['assets', 'myimages', 'public']) {
   fs.cpSync(path.join(projectDirectory, directory), path.join(outputDirectory, directory), { recursive: true });
 }
 

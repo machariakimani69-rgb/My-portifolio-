@@ -1,6 +1,9 @@
-/* ===== Features: Glassmorphism Components ===== */
+/* ============================================================
+   FEATURES CSS — Shared Feature Components (extends style.css)
+   David Macharia Kimani — Portfolio
+   ============================================================ */
 
-/* Profile engagement buttons on hero */
+/* ---- Profile engagement buttons on hero ---- */
 .profile-engagement {
 	display: flex;
 	flex-wrap: wrap;
@@ -100,7 +103,7 @@
 	color: var(--primary);
 }
 
-/* Skill cards (shared across index and pages) */
+/* ---- Skill cards ---- */
 .skill-card {
 	background: var(--glass);
 	border: 1px solid var(--glass-border);
@@ -148,7 +151,7 @@
 	line-height: 1.5;
 }
 
-/* Feature images */
+/* ---- Feature images ---- */
 .feature-image {
 	display: block;
 	margin: 32px auto 0;
@@ -166,7 +169,7 @@
 	border-radius: var(--radius);
 }
 
-/* Stats section */
+/* ---- Stats section ---- */
 .stats {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -204,7 +207,7 @@
 	font-size: 0.88rem;
 }
 
-/* About grid (used on about page) */
+/* ---- About grid ---- */
 .about-grid {
 	display: grid;
 	grid-template-columns: 0.9fr 1.1fr;
@@ -212,7 +215,7 @@
 	align-items: center;
 }
 
-/* Athletics points */
+/* ---- Athletics points ---- */
 .athletics-points {
 	display: flex;
 	flex-wrap: wrap;
@@ -234,7 +237,7 @@
 	color: var(--primary);
 }
 
-/* Gallery */
+/* ---- Gallery ---- */
 .photo-gallery {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -269,35 +272,7 @@
 	font-size: 0.88rem;
 }
 
-/* Admin-specific glassmorphism enhancements (subtle, keeps functionality) */
-.admin-header {
-	background: var(--glass);
-	border-bottom: 1px solid var(--glass-border);
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
-}
-
-.admin-brand {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	font-family: "Space Grotesk", sans-serif;
-	font-weight: 700;
-	font-size: 1rem;
-	color: var(--ink);
-	text-decoration: none;
-}
-
-.admin-brand span {
-	color: var(--primary);
-}
-
-.admin-brand b {
-	color: var(--ink);
-	font-weight: 700;
-}
-
-/* Focus items on shared pages (professional-focus, coding sections) */
+/* ===== Focus Items (shared across pages) ===== */
 .focus-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -376,7 +351,7 @@
 	line-height: 1.6;
 }
 
-/* Project cards shared */
+/* ===== Project Cards (shared) ===== */
 .projects-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
@@ -494,271 +469,7 @@
 	height: 16px;
 }
 
-/* Shared section styles */
-.section-heading {
-	margin-bottom: 32px;
-	text-align: center;
-}
-
-.section-heading h2 {
-	font-family: "Space Grotesk", sans-serif;
-	font-size: clamp(2rem, 4vw, 3rem);
-	font-weight: 600;
-	letter-spacing: -0.5px;
-	margin-bottom: 10px;
-}
-
-.section-heading .eyebrow {
-	color: var(--primary);
-	font-size: 0.75rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 1.5px;
-	display: block;
-	margin-bottom: 8px;
-}
-
-.about-text {
-	color: var(--muted);
-	font-size: 1.04rem;
-	max-width: 700px;
-	margin: 0 auto;
-}
-
-.about-text p {
-	margin: 0 0 16px;
-}
-
-.eyebrow {
-	margin: 0 0 18px;
-	color: var(--primary);
-	font-size: 0.75rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 1.5px;
-}
-
-h1,
-h2,
-h3,
-p {
-	margin-top: 0;
-}
-
-h1 {
-	font-family: "Space Grotesk", sans-serif;
-	font-weight: 600;
-	line-height: 1.05;
-}
-
-h2 {
-	font-family: "Space Grotesk", sans-serif;
-	font-weight: 600;
-}
-
-h3 {
-	font-family: "Space Grotesk", sans-serif;
-	font-weight: 600;
-}
-
-/* Focus items on shared pages (professional-focus, coding sections) */
-.focus-grid {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 20px;
-	border-top: 1px solid var(--line);
-	border-bottom: 1px solid var(--line);
-	padding: 30px 0;
-}
-
-.focus-item {
-	position: relative;
-	min-width: 0;
-	padding: 32px 24px;
-	border: 1px solid var(--glass-border);
-	border-radius: var(--radius);
-	background: var(--glass);
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
-	transition: all 0.3s ease;
-	animation: fade-in-up 0.6s ease both;
-}
-
-.focus-item:nth-child(2) {
-	animation-delay: 0.1s;
-}
-
-.focus-item:nth-child(3) {
-	animation-delay: 0.2s;
-}
-
-.focus-item:hover {
-	border-color: var(--primary);
-	transform: translateY(-6px);
-	box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
-}
-
-.focus-item:hover > svg {
-	color: var(--primary);
-}
-
-.focus-item:last-child {
-	padding-right: 0;
-	border-right: 0;
-}
-
-.focus-number {
-	display: block;
-	margin-bottom: 18px;
-	color: var(--primary);
-	font-family: "Space Grotesk", sans-serif;
-	font-size: 0.8rem;
-	font-weight: 700;
-	letter-spacing: 1px;
-}
-
-.focus-item > svg {
-	width: 24px;
-	height: 24px;
-	margin-bottom: 16px;
-	color: var(--muted);
-	transition: color 0.2s ease;
-}
-
-.focus-item h3 {
-	margin-bottom: 8px;
-	font-family: "Space Grotesk", sans-serif;
-	font-size: 1.1rem;
-	color: var(--ink);
-}
-
-.focus-item p {
-	max-width: 340px;
-	margin-bottom: 0;
-	color: var(--muted);
-	font-size: 0.92rem;
-	line-height: 1.6;
-}
-
-/* Project cards shared */
-.projects-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-	align-items: stretch;
-	gap: 20px;
-}
-
-.project-card {
-	display: flex;
-	flex-direction: column;
-	position: relative;
-	overflow: hidden;
-	border: 1px solid var(--line);
-	border-radius: var(--radius);
-	background: var(--panel);
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	transition: all 0.3s ease;
-	animation: fade-in-up 0.5s ease both;
-}
-
-.project-card:nth-child(2) {
-	animation-delay: 0.1s;
-}
-
-.project-card:nth-child(3) {
-	animation-delay: 0.2s;
-}
-
-.project-card:hover {
-	border-color: var(--primary);
-	transform: translateY(-8px);
-	box-shadow: 0 24px 48px rgba(0, 212, 255, 0.1);
-}
-
-.project-image {
-	position: relative;
-	height: auto;
-	min-height: 200px;
-	aspect-ratio: 16 / 10;
-	background: rgba(0, 212, 255, 0.05);
-	display: grid;
-	place-items: center;
-	font-family: "Space Grotesk", sans-serif;
-	font-size: 3rem;
-	font-weight: 700;
-	color: var(--primary);
-	overflow: hidden;
-}
-
-.project-image img {
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	opacity: 0;
-	transition: opacity 0.4s ease;
-}
-
-.project-card:hover .project-image img {
-	opacity: 0.85;
-}
-
-.project-body {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	align-items: flex-start;
-	padding: 20px;
-}
-
-.project-meta {
-	width: 100%;
-	align-items: flex-start;
-	margin-bottom: 12px;
-}
-
-.project-meta h3 {
-	margin-bottom: 0;
-	font-family: "Space Grotesk", sans-serif;
-	font-size: 1.25rem;
-	color: var(--ink);
-}
-
-.project-meta span {
-	font-size: 0.76rem;
-	text-transform: uppercase;
-	color: var(--primary);
-	font-weight: 700;
-	letter-spacing: 0.5px;
-}
-
-.project-body p {
-	flex: 1;
-	color: var(--muted);
-	font-size: 0.92rem;
-	line-height: 1.6;
-	margin-bottom: 0;
-}
-
-.project-link {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	border-bottom: 1px solid currentColor;
-	padding-bottom: 2px;
-	font-weight: 700;
-	color: var(--primary);
-	margin-top: auto;
-}
-
-.project-link svg {
-	width: 16px;
-	height: 16px;
-}
-
-/* Stats */
+/* ===== Stats ===== */
 .stats {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -796,7 +507,7 @@ h3 {
 	font-size: 0.88rem;
 }
 
-/* Contact section */
+/* ===== Contact Section ===== */
 .contact {
 	padding: 80px 0;
 	position: relative;
@@ -858,7 +569,7 @@ h3 {
 	color: var(--primary);
 }
 
-/* Footer */
+/* ===== Footer ===== */
 footer {
 	padding: 40px 0;
 	background: rgba(2, 6, 23, 0.4);
@@ -875,18 +586,7 @@ footer {
 	color: var(--muted);
 }
 
-/* Utilities */
-.reveal-on-scroll {
-	opacity: 0;
-	transform: translateY(24px);
-	transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.reveal-on-scroll.is-visible {
-	opacity: 1;
-	transform: translateY(0);
-}
-
+/* ===== Utilities ===== */
 .skill-interest {
 	border-radius: 12px;
 	background: color-mix(in srgb, var(--panel) 86%, transparent);
@@ -980,7 +680,7 @@ button:focus-visible {
 	outline-offset: 4px;
 }
 
-/* Responsive overrides for glassmorphism */
+/* ===== Responsive overrides for glassmorphism ===== */
 @media (max-width: 900px) {
 	.nav-links a {
 		font-size: 0.72rem;
