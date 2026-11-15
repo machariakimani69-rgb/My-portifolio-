@@ -11,6 +11,39 @@ const pageLinks = [
   { file: 'contact.html', label: 'Contact', icon: 'mail' },
 ];
 
+// ---- Theme initialization (runs before render to prevent flash) ----
+const readSavedTheme = () => {
+  try {
+    return localStorage.getItem('portfolio-theme');
+  } catch {
+    return null;
+  }
+};
+
+const applyShellTheme = (theme, savePreference = false) => {
+  const selectedTheme = theme === 'dark' ? 'dark' : 'light';
+  const isDark = selectedTheme === 'dark';
+  document.documentElement.dataset.theme = selectedTheme;
+
+  const themeButton = document.querySelector('#themeToggle');
+  if (themeButton) {
+    const label = `Switch to ${isDark ? 'light' : 'dark'} theme`;
+    themeButton.setAttribute('aria-label', label);
+    themeButton.setAttribute('title', label);
+    themeButton.setAttribute('aria-pressed', String(isDark));
+  }
+
+  if (savePreference) {
+    try {
+      localStorage.setItem('portfolio-theme', selectedTheme);
+    } catch {
+      return;
+    }
+  }
+};
+
+applyShellTheme(readSavedTheme() || document.documentElement.dataset.defaultTheme || 'dark');
+
 const pageDefinitions = {
   about: {
     eyebrow: 'Profile',
@@ -418,4 +451,12 @@ if (pageDefinition && pageRoot) {
 
   pageRoot.replaceWith(header, main, footer);
   if (window.lucide?.createIcons) window.lucide.createIcons();
+
+  const toggleButton = document.querySelector('#themeToggle');
+  if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      applyShellTheme(nextTheme, true);
+    });
+  }
 }

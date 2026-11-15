@@ -1,12 +1,28 @@
 :root {
-  color-scheme: light;
+  --page: #07111f;
+  --surface: #0d1b2b;
+  --ink: #eaf2ff;
+  --muted: #94a8c0;
+  --line: #20344c;
+  --green: #4a9cff;
+  --green-dark: #2876d5;
+  --accent: #83baff;
+  --danger: #ff828c;
+  --danger-soft: rgba(255, 130, 140, 0.2);
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="light"] {
   --page: #f2f5f1;
   --surface: #fff;
   --ink: #1a2820;
   --muted: #637168;
   --line: #d8e0d9;
   --green: #236653;
+  --green-dark: #194e3e;
+  --accent: #e18a68;
   --danger: #a63e36;
+  --danger-soft: #ebc7c4;
   --shadow: 0 16px 44px rgba(23, 37, 31, 0.1);
 }
 
@@ -40,9 +56,9 @@ a {
 }
 
 button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-  outline: 3px solid #e18a68;
+  a:focus-visible,
+  input:focus-visible {
+  outline: 3px solid var(--accent, #e18a68);
   outline-offset: 3px;
 }
 
@@ -66,7 +82,7 @@ input:focus-visible {
 }
 
 .account-brand span {
-  color: #e18a68;
+  color: var(--accent);
 }
 
 .account-card {
@@ -135,7 +151,7 @@ input:focus-visible {
   border-color: var(--surface);
   background: var(--surface);
   color: var(--green);
-  box-shadow: 0 2px 8px rgba(23, 37, 31, 0.07);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .account-message {
@@ -185,7 +201,7 @@ input:focus-visible {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
 }
 
@@ -269,7 +285,7 @@ input:focus-visible {
 }
 
 .account-submit:hover {
-  background: #194e3e;
+  background: var(--green-dark);
 }
 
 .account-submit:disabled,
@@ -366,7 +382,7 @@ input:focus-visible {
 .delete-account-form {
   margin-top: 16px;
   padding: 16px;
-  border: 1px solid #ebc7c4;
+  border: 1px solid var(--danger-soft);
   border-radius: 5px;
 }
 

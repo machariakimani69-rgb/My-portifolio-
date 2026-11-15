@@ -1,16 +1,35 @@
 :root {
-  color-scheme: dark;
   --page: #07111f;
   --surface: #0d1b2b;
   --surface-raised: #11243a;
+  --page-alpha: rgba(7, 17, 31, 0.96);
   --ink: #eaf2ff;
   --muted: #94a8c0;
   --line: #20344c;
+  --line-strong: #38536f;
   --green: #4a9cff;
   --green-dark: #2876d5;
   --coral: #83baff;
   --danger: #ff828c;
+  --danger-soft: rgba(255, 130, 140, 0.35);
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="light"] {
+  --page: #f2f5f1;
+  --surface: #fff;
+  --surface-raised: #f7f9f8;
+  --page-alpha: rgba(242, 245, 241, 0.96);
+  --ink: #1a2820;
+  --muted: #637168;
+  --line: #d8e0d9;
+  --line-strong: #b8c6bf;
+  --green: #236653;
+  --green-dark: #194e3e;
+  --coral: #e18a68;
+  --danger: #a63e36;
+  --danger-soft: #ebc7c4;
+  --shadow: 0 16px 44px rgba(23, 37, 31, 0.1);
 }
 
 * {
@@ -151,14 +170,14 @@ p {
 }
 
 input[type="text"],
-input[type="password"],
-textarea {
+  input[type="password"],
+  textarea {
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  background: #091525;
+  background: var(--surface-raised);
   color: var(--ink);
 }
 
@@ -168,8 +187,8 @@ textarea {
 }
 
 input:hover,
-textarea:hover {
-  border-color: #38536f;
+  textarea:hover {
+  border-color: var(--line-strong);
 }
 
 .password-field {
@@ -296,7 +315,7 @@ textarea:hover {
   gap: 20px;
   padding: 0 28px;
   border-bottom: 1px solid var(--line);
-  background: rgba(7, 17, 31, 0.96);
+  background: var(--page-alpha, rgba(7, 17, 31, 0.96));
 }
 
 .admin-brand {
@@ -508,9 +527,9 @@ textarea:hover {
 }
 
 .status-online {
-  border-color: rgba(74, 156, 255, 0.35);
-  background: rgba(74, 156, 255, 0.1);
-  color: #82bdff;
+  border-color: var(--primary-soft, rgba(74, 156, 255, 0.35));
+  background: var(--primary-soft, rgba(74, 156, 255, 0.1));
+  color: var(--primary, #82bdff);
 }
 
 .dashboard-metrics,
@@ -945,12 +964,12 @@ textarea:hover {
 }
 
 .analytics-filters select,
-.analytics-filters input[type="date"] {
+  .analytics-filters input[type="date"] {
   min-height: 44px;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  background: #091525;
+  background: var(--surface-raised);
   color: var(--ink);
 }
 

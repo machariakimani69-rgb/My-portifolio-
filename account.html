@@ -9,6 +9,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="account.css" />
+    <script>
+      // Theme initialization (runs before render to prevent flash)
+      (function () {
+        var saved = null;
+        try { saved = localStorage.getItem('portfolio-theme'); } catch (e) {}
+        var theme = saved || document.documentElement.dataset.defaultTheme || 'dark';
+        document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+      })();
+    </script>
     <title>Visitor account | David Macharia Kimani</title>
   </head>
   <body>
