@@ -39,7 +39,7 @@ const applyTheme = (theme, savePreference = false) => {
 	}
 };
 
-applyTheme(readSavedTheme() || document.documentElement.dataset.defaultTheme || 'dark');
+applyTheme(readSavedTheme() || document.documentElement?.dataset.defaultTheme || 'dark');
 
 if (themeButton) {
 	themeButton.addEventListener('click', () => {

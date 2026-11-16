@@ -42,7 +42,7 @@ const applyShellTheme = (theme, savePreference = false) => {
   }
 };
 
-applyShellTheme(readSavedTheme() || document.documentElement.dataset.defaultTheme || 'dark');
+applyShellTheme(readSavedTheme() || (document.documentElement?.dataset.defaultTheme) || 'dark');
 
 const pageDefinitions = {
   about: {
