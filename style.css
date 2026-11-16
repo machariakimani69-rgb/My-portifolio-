@@ -370,7 +370,7 @@ a {
 .menu-toggle {
 	grid-column: 4;
 	grid-row: 1;
-	display: inline-flex;
+	display: none;
 	align-items: center;
 	justify-content: center;
 	min-width: 44px;
