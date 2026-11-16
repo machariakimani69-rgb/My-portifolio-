@@ -433,7 +433,7 @@ a {
 .btn-primary {
 	background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 	border-color: transparent;
-	color: #000000;
+	color: var(--ink);
 	box-shadow: 0 0 30px var(--primary-glow);
 }
 
@@ -441,7 +441,7 @@ a {
 	box-shadow: 0 0 45px var(--primary-glow);
 	transform: translateY(-2px);
 	border-color: transparent;
-	color: #000000;
+	color: var(--ink);
 }
 
 .btn-secondary {

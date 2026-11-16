@@ -121,6 +121,7 @@ function sendAnalytics(eventType, label = '') {
 }
 
 function currentPageKey() {
+  if (!document.body) return window.location.pathname.split('/').pop() || 'index.html';
   return document.body.dataset.sitePage
     ? `${document.body.dataset.sitePage}.html`
     : window.location.pathname.split('/').pop() || 'index.html';
@@ -240,7 +241,7 @@ function addProfileEngagement() {
 }
 
 function addInterestTracking() {
-  if (document.body.dataset.interestTracking === 'ready') return;
+  if (!document.body || document.body.dataset.interestTracking === 'ready') return;
   document.body.dataset.interestTracking = 'ready';
   document.addEventListener('click', (event) => {
     const skill = event.target.closest('.skill-interest');

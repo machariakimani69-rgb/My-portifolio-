@@ -239,7 +239,7 @@ const setMenuOpen = (isOpen) => {
 	if (isOpen) {
 		mobileNavOverlay.replaceChildren(
 			...Array.from(
-				navigation.querySelectorAll('a[data-page]'),
+				navigation.querySelectorAll('a'),
 				(link) => link.cloneNode(true)
 			)
 		);

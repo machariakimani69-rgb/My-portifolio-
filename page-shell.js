@@ -131,7 +131,7 @@ const pageDefinitions = {
   },
 };
 
-const pageKey = document.body.dataset.sitePage;
+const pageKey = document.body ? document.body.dataset.sitePage : undefined;
 const pageDefinition = pageDefinitions[pageKey];
 const pageRoot = document.querySelector('#pageRoot');
 

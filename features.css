@@ -1077,8 +1077,10 @@ button:focus-visible {
 .assistant-panel {
 	position: absolute;
 	bottom: 72px;
-	right: 0;
-	width: 320px;
+	right: 8px;
+	left: 8px;
+	max-width: 320px;
+	width: min(320px, calc(100vw - 16px));
 	background: var(--panel);
 	border: 1px solid var(--glass-border);
 	border-radius: var(--radius-lg);
@@ -1432,4 +1434,33 @@ button:focus-visible {
 	top: 0;
 	outline: 3px solid var(--primary);
 	outline-offset: 2px;
+}
+
+/* ---- CV download button (theme-aware) ---- */
+.cv-download-button {
+	min-height: 46px;
+	padding: 11px 24px;
+	border-radius: 50px;
+	border: 1px solid var(--line);
+	background: var(--panel);
+	color: var(--ink);
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.25s ease;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-size: 0.9rem;
+}
+
+.cv-download-button:hover {
+	background: var(--bg-secondary);
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.cv-download-button svg {
+	width: 17px;
+	height: 17px;
 }
