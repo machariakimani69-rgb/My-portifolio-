@@ -916,10 +916,10 @@ function addLocalPortfolioTools() {
       if (appearance && /^#[0-9a-f]{6}$/i.test(appearance.accentColor)) {
         document.documentElement.style.setProperty('--primary', appearance.accentColor);
         document.documentElement.style.setProperty('--green', appearance.accentColor);
-        document.documentElement?.dataset.defaultTheme = appearance.defaultTheme === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.defaultTheme = appearance.defaultTheme === 'dark' ? 'dark' : 'light';
       }
       if (!readSavedTheme()) {
-        document.documentElement?.dataset.theme = appearance?.defaultTheme === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = (appearance?.defaultTheme === 'dark') ? 'dark' : 'light';
         const themeButton = document.querySelector('#themeToggle');
         if (themeButton) {
         const label = `Switch to ${document.documentElement?.dataset.theme === 'dark' ? 'light' : 'dark'} theme`;
@@ -1175,7 +1175,6 @@ function addWelcomeAnimation() {
 		sessionStorage.setItem('portfolio-welcome-shown', 'true');
 		setTimeout(() => overlay.remove(), 600);
 	}, 4500);
-}
 
 	const balloonContainer = overlay.querySelector('#welcomeBalloons');
 	const confettiContainer = overlay.querySelector('#welcomeConfetti');

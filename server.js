@@ -190,20 +190,20 @@ async function makeSessionCookie() {
   const token = crypto.randomBytes(32).toString('base64url');
   const tokenHash = adminSessionKey(token);
   await database.createAdminSession(tokenHash, now + SESSION_DURATION * 1000);
-  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const sameSiteValue = isProduction ? 'None' : 'Lax';
   const secureFlag = isProduction ? '; Secure' : '';
   return `${SESSION_COOKIE}=${token}; HttpOnly; SameSite=${sameSiteValue}; Path=/; Max-Age=${SESSION_DURATION}${secureFlag}`;
 }
 
 function makeCsrfCookie() {
   const token = crypto.randomBytes(32).toString('base64url');
-  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const sameSiteValue = isProduction ? 'None' : 'Lax';
   const secureFlag = isProduction ? '; Secure' : '';
   return `${CSRF_COOKIE}=${token}; SameSite=${sameSiteValue}; Path=/; Max-Age=${SESSION_DURATION}${secureFlag}`;
 }
 
 function clearCsrfCookie() {
-  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const sameSiteValue = isProduction ? 'None' : 'Lax';
   const secureFlag = isProduction ? '; Secure' : '';
   return `${CSRF_COOKIE}=; SameSite=${sameSiteValue}; Path=/; Max-Age=0${secureFlag}`;
 }
@@ -228,7 +228,7 @@ async function hasValidSession(request) {
 async function clearAdminSession(request) {
   const session = await adminSessionFromRequest(request);
   if (session) await database.deleteAdminSession(session.tokenHash);
-  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const sameSiteValue = isProduction ? 'None' : 'Lax';
   const secureFlag = isProduction ? '; Secure' : '';
   return `${SESSION_COOKIE}=; HttpOnly; SameSite=${sameSiteValue}; Path=/; Max-Age=0${secureFlag}`;
 }
@@ -299,7 +299,7 @@ async function createVisitorSession(account) {
   const token = crypto.randomBytes(32).toString('base64url');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
   await database.createVisitorSession(tokenHash, account.id, Date.now() + SESSION_DURATION * 1000);
-  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const sameSiteValue = isProduction ? 'None' : 'Lax';
   const secureFlag = isProduction ? '; Secure' : '';
   return `${VISITOR_SESSION_COOKIE}=${token}; HttpOnly; SameSite=${sameSiteValue}; Path=/; Max-Age=${SESSION_DURATION}${secureFlag}`;
 }
@@ -307,7 +307,7 @@ async function createVisitorSession(account) {
 async function clearVisitorSession(request) {
   const session = await visitorSessionFromRequest(request);
   if (session) await database.deleteVisitorSession(session.tokenHash);
-  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const sameSiteValue = isProduction ? 'None' : 'Lax';
   const secureFlag = isProduction ? '; Secure' : '';
   return `${VISITOR_SESSION_COOKIE}=; HttpOnly; SameSite=${sameSiteValue}; Path=/; Max-Age=0${secureFlag}`;
 }

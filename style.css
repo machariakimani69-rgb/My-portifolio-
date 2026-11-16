@@ -283,11 +283,9 @@ a {
 }
 
 .nav-links {
-	position: absolute;
-	top: calc(100% - 4px);
-	right: 0;
-	z-index: 21;
-	display: none;
+	position: static;
+	z-index: auto;
+	display: grid;
 	width: min(860px, calc(100vw - 32px));
 	max-height: 70vh;
 	overflow-y: auto;

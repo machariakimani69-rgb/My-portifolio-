@@ -85,7 +85,7 @@ test('admin and visitor sign-in protect and load their required pages', async ()
   assert.equal(adminLogin.status, 200);
   const adminSetCookie = adminLogin.headers.get('set-cookie');
   assert.match(adminSetCookie, /HttpOnly/i);
-  assert.match(adminSetCookie, /SameSite=Strict/i);
+  assert.match(adminSetCookie, /SameSite=Lax/i);
   assert.match(adminSetCookie, /Path=\//i);
   assert.match(adminSetCookie, /Max-Age=1800/i);
   const adminCookie = adminSetCookie.split(';', 1)[0];

@@ -707,10 +707,6 @@ button:focus-visible {
 	}
 }
 
-#mobileNavOverlay {
-	display: none;
-}
-
 @media (max-width: 700px) {
 	.container {
 		width: min(100% - 32px, 540px);
@@ -741,47 +737,6 @@ button:focus-visible {
 
 	.nav-links.open {
 		display: grid;
-	}
-
-	#mobileNavOverlay {
-		position: fixed;
-		top: 64px;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 9999;
-		display: none;
-		width: 100%;
-		max-width: none;
-		padding: 16px 20px 24px;
-		border: 0;
-		border-radius: 0;
-		background: var(--bg);
-		color: var(--ink);
-		box-shadow: none;
-		overflow-y: auto;
-		-webkit-overflow-scrolling: touch;
-	}
-
-	#mobileNavOverlay.open {
-		display: flex;
-		flex-direction: column;
-	}
-
-	#mobileNavOverlay a {
-		justify-content: flex-start;
-		width: 100%;
-		padding: 10px 0;
-		font-size: 0.88rem;
-		color: var(--ink);
-		text-decoration: none;
-		border-radius: var(--radius-sm);
-	}
-
-	#mobileNavOverlay a:hover,
-	#mobileNavOverlay a.active {
-		color: var(--primary);
-		background: rgba(0, 212, 255, 0.05);
 	}
 
 	.nav-links a {
@@ -996,7 +951,6 @@ button:focus-visible {
 	pointer-events: none;
 	z-index: 9999;
 	transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
-	mix-blend-mode: difference;
 	display: none;
 }
 
@@ -1017,12 +971,6 @@ button:focus-visible {
 @media (min-width: 769px) {
 	.custom-cursor {
 		display: block;
-	}
-	body {
-		cursor: none;
-	}
-	a, button, [role="button"], input, select, textarea, label, .skill-card, .project-card, .focus-item {
-		cursor: none !important;
 	}
 }
 
