@@ -41,9 +41,9 @@
 }
 
 .profile-like-button[aria-pressed="true"] {
-	border-color: #c95b62;
-	background: rgba(201, 91, 98, 0.1);
-	color: #c95b62;
+	border-color: var(--danger);
+	background: var(--danger-soft);
+	color: var(--danger);
 }
 
 .profile-like-button strong {
@@ -572,7 +572,8 @@
 /* ===== Footer ===== */
 footer {
 	padding: 40px 0;
-	background: rgba(2, 6, 23, 0.4);
+	background: var(--bg);
+	color: var(--ink-muted);
 	border-top: 1px solid var(--line);
 }
 
@@ -1053,7 +1054,7 @@ button:focus-visible {
 	height: 56px;
 	border-radius: 50%;
 	background: var(--primary);
-	color: #ffffff;
+	color: #000000;
 	display: grid;
 	place-items: center;
 	cursor: pointer;
@@ -1069,7 +1070,7 @@ button:focus-visible {
 	width: 26px;
 	height: 26px;
 	fill: none;
-	stroke: #ffffff;
+	stroke: #000000;
 	stroke-width: 2;
 }
 
@@ -1140,7 +1141,7 @@ button:focus-visible {
 
 .assistant-message.user {
 	background: var(--primary);
-	color: #ffffff;
+	color: #000000;
 	align-self: flex-end;
 	border-bottom-right-radius: 2px;
 }
@@ -1181,7 +1182,7 @@ button:focus-visible {
 	border: none;
 	border-radius: 24px;
 	background: var(--primary);
-	color: #ffffff;
+	color: #000000;
 	font: inherit;
 	font-size: 0.85rem;
 	font-weight: 600;
@@ -1301,7 +1302,7 @@ button:focus-visible {
 	border: none;
 	border-radius: 8px;
 	background: var(--primary);
-	color: #ffffff;
+	color: #000000;
 	font: inherit;
 	font-weight: 600;
 	cursor: pointer;
