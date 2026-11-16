@@ -16,6 +16,7 @@ const UPLOADS_DIR = path.join(ROOT, 'uploads');
 const SESSION_COOKIE = 'portfolio_admin';
 const VISITOR_SESSION_COOKIE = 'portfolio_visitor';
 const ANALYTICS_CONSENT_COOKIE = 'portfolio_analytics_consent';
+const CSRF_COOKIE = 'portfolio_csrf';
 const SESSION_DURATION = 30 * 60;
 const ANALYTICS_CONSENT_DURATION = 365 * 24 * 60 * 60;
 const ANALYTICS_RETENTION_DAYS = 365;
@@ -148,12 +149,19 @@ function securityHeaders() {
 
 function sendJson(response, statusCode, value, headers = {}) {
   if (statusCode >= 500) applicationErrorCount += 1;
-  response.writeHead(statusCode, {
+  const responseHeaders = {
     ...securityHeaders(),
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     ...headers,
-  });
+  };
+  const setCookieHeaders = [];
+  if (headers['Set-Cookie']) setCookieHeaders.push(headers['Set-Cookie']);
+  if (statusCode < 400) setCookieHeaders.push(makeCsrfCookie());
+  if (setCookieHeaders.length > 0) {
+    responseHeaders['Set-Cookie'] = setCookieHeaders;
+  }
+  response.writeHead(statusCode, responseHeaders);
   response.end(JSON.stringify(value));
 }
 
@@ -185,6 +193,32 @@ async function makeSessionCookie() {
   const sameSiteValue = isProduction ? 'None' : 'Strict';
   const secureFlag = isProduction ? '; Secure' : '';
   return `${SESSION_COOKIE}=${token}; HttpOnly; SameSite=${sameSiteValue}; Path=/; Max-Age=${SESSION_DURATION}${secureFlag}`;
+}
+
+function makeCsrfCookie() {
+  const token = crypto.randomBytes(32).toString('base64url');
+  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const secureFlag = isProduction ? '; Secure' : '';
+  return `${CSRF_COOKIE}=${token}; SameSite=${sameSiteValue}; Path=/; Max-Age=${SESSION_DURATION}${secureFlag}`;
+}
+
+function clearCsrfCookie() {
+  const sameSiteValue = isProduction ? 'None' : 'Strict';
+  const secureFlag = isProduction ? '; Secure' : '';
+  return `${CSRF_COOKIE}=; SameSite=${sameSiteValue}; Path=/; Max-Age=0${secureFlag}`;
+}
+
+function readCsrfToken(request) {
+  const cookieHeader = request.headers.cookie || '';
+  const match = cookieHeader.match(/(?:^|;\s*)${CSRF_COOKIE}=([^;]+)/);
+  return match ? match[1] : null;
+}
+
+function validateCsrfToken(request) {
+  const csrfToken = request.headers['x-csrf-token'] || request.headers['X-CSRF-Token'];
+  const cookieToken = readCsrfToken(request);
+  if (!csrfToken || !cookieToken || csrfToken !== cookieToken) return false;
+  return true;
 }
 
 async function hasValidSession(request) {
@@ -1260,7 +1294,7 @@ async function handleRequest(request, response) {
         .map((header) => header.trim().toLowerCase())
         .filter(Boolean);
       const allowedMethods = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'];
-      const allowedHeaders = new Set(['accept', 'content-type']);
+      const allowedHeaders = new Set(['accept', 'content-type', 'x-csrf-token']);
       if (!origin
         || !allowedMethods.includes(requestedMethod)
         || requestedHeaders.some((header) => !allowedHeaders.has(header))) {
@@ -1276,6 +1310,21 @@ async function handleRequest(request, response) {
         Vary: 'Origin',
       });
       return response.end();
+    }
+  }
+
+  // CSRF protection for state-changing requests
+  const stateChangingMethods = new Set(['POST', 'PUT', 'DELETE', 'PATCH']);
+  const csrfExemptPaths = ['/api/visitor/login', '/api/visitor/register'];
+  if (
+    stateChangingMethods.has(request.method)
+    && pathname.startsWith('/api/')
+    && !csrfExemptPaths.includes(pathname)
+  ) {
+    const hasOriginProtection = hasSameOrigin(request);
+    const hasCsrfProtection = validateCsrfToken(request);
+    if (!hasOriginProtection && !hasCsrfProtection) {
+      return sendJson(response, 403, { error: 'CSRF token validation failed.' });
     }
   }
 

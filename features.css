@@ -1411,3 +1411,24 @@ button:focus-visible {
 		transition: none;
 	}
 }
+
+/* ---- Skip to content link ---- */
+.skip-link {
+	position: absolute;
+	top: -48px;
+	left: 0;
+	background: var(--primary);
+	color: #000000;
+	padding: 8px 16px;
+	z-index: 10000;
+	text-decoration: none;
+	font-weight: 700;
+	border-radius: 0 0 6px 6px;
+	transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+	top: 0;
+	outline: 3px solid var(--primary);
+	outline-offset: 2px;
+}

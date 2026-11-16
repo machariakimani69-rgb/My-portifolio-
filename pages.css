@@ -357,8 +357,8 @@
 /* ---- Footer ---- */
 footer {
 	padding: 20px 0 32px;
-	background: rgba(2, 6, 23, 0.4);
-	color: #d1ddd5;
+	background: var(--bg);
+	color: var(--ink-muted);
 	border-top: 1px solid var(--line);
 }
 

@@ -13,11 +13,14 @@
 	--ink-muted: #94a3b8;
 	--ink-dim: #64748b;
 	--primary: #00d4ff;
+	--primary-dark: #0078a0;
 	--primary-glow: rgba(0, 212, 255, 0.35);
 	--primary-soft: rgba(0, 212, 255, 0.1);
 	--accent: #7c3aed;
 	--accent-glow: rgba(124, 58, 237, 0.35);
 	--accent-soft: rgba(124, 58, 237, 0.1);
+	--danger: #ff6b6b;
+	--danger-soft: rgba(255, 107, 107, 0.15);
 	--line: rgba(255, 255, 255, 0.06);
 	--line-strong: rgba(255, 255, 255, 0.12);
 	--shadow: rgba(2, 6, 23, 0.5);
@@ -41,11 +44,14 @@
 	--ink-muted: #64748b;
 	--ink-dim: #94a3b8;
 	--primary: #0099d9;
+	--primary-dark: #005f7a;
 	--primary-glow: rgba(0, 212, 255, 0.25);
 	--primary-soft: rgba(0, 212, 255, 0.1);
 	--accent: #7c3aed;
 	--accent-glow: rgba(124, 58, 237, 0.25);
 	--accent-soft: rgba(124, 58, 237, 0.1);
+	--danger: #e1605e;
+	--danger-soft: rgba(225, 96, 94, 0.15);
 	--line: rgba(0, 0, 0, 0.08);
 	--line-strong: rgba(0, 0, 0, 0.12);
 	--shadow: rgba(0, 0, 0, 0.1);
@@ -425,9 +431,9 @@ a {
 }
 
 .btn-primary {
-	background: linear-gradient(135deg, var(--primary), #0078a0);
+	background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 	border-color: transparent;
-	color: #ffffff;
+	color: #000000;
 	box-shadow: 0 0 30px var(--primary-glow);
 }
 
@@ -435,7 +441,7 @@ a {
 	box-shadow: 0 0 45px var(--primary-glow);
 	transform: translateY(-2px);
 	border-color: transparent;
-	color: #ffffff;
+	color: #000000;
 }
 
 .btn-secondary {
@@ -644,9 +650,9 @@ h1 span {
 }
 
 .profile-like-button[aria-pressed="true"] {
-	border-color: #c95b62;
-	background: rgba(201, 91, 98, 0.1);
-	color: #c95b62;
+	border-color: var(--danger);
+	background: var(--danger-soft);
+	color: var(--danger);
 }
 
 .profile-like-button strong {

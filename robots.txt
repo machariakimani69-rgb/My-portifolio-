@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin.html
+Disallow: /account.html
+Disallow: /api/
+Disallow: /uploads/
+
+Sitemap: https://david-portifolio-kdx3.onrender.com/sitemap.xml

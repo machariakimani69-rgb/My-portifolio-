@@ -12,16 +12,29 @@
     apiOrigin = configuredUrl.origin;
   }
 
+  function readCsrfCookie() {
+    const match = document.cookie.match(/(?:^|;\s*)portfolio_csrf=([^;]+)/);
+    return match ? match[1] : null;
+  }
+
   window.portfolioApiUrl = (path) => {
     const url = new URL(path, `${apiOrigin}/`);
     if (url.origin !== apiOrigin) throw new Error('Portfolio API URLs must use the configured backend origin.');
     return url.href;
   };
 
-  window.portfolioApiFetch = (path, options = {}) => fetch(window.portfolioApiUrl(path), {
-    ...options,
-    credentials: 'include',
-  });
+  window.portfolioApiFetch = (path, options = {}) => {
+    const fetchOptions = { ...options, credentials: 'include' };
+    const method = (options.method || 'GET').toUpperCase();
+    const stateChanging = new Set(['POST', 'PUT', 'DELETE', 'PATCH']).has(method);
+    if (stateChanging) {
+      const csrfToken = readCsrfCookie();
+      if (csrfToken) {
+        fetchOptions.headers = { ...(fetchOptions.headers || {}), 'X-CSRF-Token': csrfToken };
+      }
+    }
+    return fetch(window.portfolioApiUrl(path), fetchOptions);
+  };
 
   window.portfolioUploadFile = async (file) => {
     if (!(file instanceof File) || file.size < 1 || file.size > 5 * 1024 * 1024) {
