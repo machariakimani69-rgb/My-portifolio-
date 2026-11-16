@@ -1594,6 +1594,13 @@ addProjectTools();
 addContactActions();
 addPageUtilities();
 addLocalPortfolioTools();
+addWelcomeAnimation();
+addAnimatedIntroduction();
+addFloatingTechIcons();
+addCustomCursor();
+addAchievementCounters();
+addPortfolioAssistant();
+addTestimonials();
 
 const contentRoot = document.querySelector('#pageRoot');
 if (contentRoot) {
