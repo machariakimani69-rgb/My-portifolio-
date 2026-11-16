@@ -856,6 +856,25 @@ button:focus-visible {
 	margin: 0;
 }
 
+.welcome-dismiss {
+	margin-top: 20px;
+	padding: 10px 24px;
+	border: none;
+	border-radius: 24px;
+	background: var(--primary);
+	color: var(--ink);
+	font: inherit;
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.25s ease;
+}
+
+.welcome-dismiss:hover {
+	background: var(--primary-dark);
+	color: var(--ink);
+}
+
 .balloons {
 	position: absolute;
 	inset: 0;
@@ -1184,7 +1203,7 @@ button:focus-visible {
 	border: none;
 	border-radius: 24px;
 	background: var(--primary);
-	color: #000000;
+	color: var(--ink);
 	font: inherit;
 	font-size: 0.85rem;
 	font-weight: 600;
@@ -1463,4 +1482,183 @@ button:focus-visible {
 .cv-download-button svg {
 	width: 17px;
 	height: 17px;
+}
+
+/* ---- Footer action buttons ---- */
+.page-utilities {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	justify-content: center;
+}
+
+.page-utilities button {
+	min-height: 40px;
+	padding: 8px 16px;
+	border: 1px solid var(--line);
+	border-radius: 24px;
+	background: var(--panel);
+	color: var(--ink);
+	font: inherit;
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.25s ease;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+}
+
+.page-utilities button:hover {
+	background: var(--bg-secondary);
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.page-utilities button svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* ---- Site search dialog ---- */
+.site-search-dialog {
+	position: fixed;
+	inset: 0;
+	z-index: 10001;
+	display: none;
+	background: color-mix(in srgb, var(--bg) 85%, transparent);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+
+.site-search-dialog[open] {
+	display: grid;
+	place-items: center;
+}
+
+.site-search-form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: min(520px, calc(100vw - 32px));
+	padding: 32px 24px;
+	border-radius: var(--radius-lg);
+	background: var(--panel);
+	border: 1px solid var(--glass-border);
+	box-shadow: 0 24px 60px var(--shadow-deep);
+}
+
+.site-search-field {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border: 1px solid var(--line);
+	border-radius: 24px;
+	background: var(--bg);
+	padding: 10px 16px;
+}
+
+.site-search-field i {
+	color: var(--ink-muted);
+	font-size: 1rem;
+}
+
+#siteSearchInput {
+	flex: 1;
+	border: none;
+	background: transparent;
+	color: var(--ink);
+	font: inherit;
+	font-size: 0.95rem;
+	outline: none;
+}
+
+#siteSearchInput::placeholder {
+	color: var(--ink-muted);
+}
+
+#siteSearchInput:focus {
+	outline: none;
+}
+
+.site-search-field .icon-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--ink-muted);
+	padding: 4px;
+}
+
+.site-search-field .icon-button:hover {
+	color: var(--primary);
+}
+
+.site-search-results {
+	max-height: 300px;
+	overflow-y: auto;
+	border-top: 1px solid var(--line);
+	padding-top: 16px;
+}
+
+.search-result {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 12px 16px;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.search-result:hover {
+	background: var(--bg-secondary);
+}
+
+.search-result strong {
+	color: var(--ink);
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+.search-result span {
+	color: var(--ink-muted);
+	font-size: 0.8rem;
+}
+
+.search-empty,
+.search-hint {
+	text-align: center;
+	color: var(--ink-muted);
+	font-size: 0.85rem;
+	margin-top: 12px;
+}
+
+/* ---- Search toggle button ---- */
+.site-search-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	min-width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: var(--panel);
+	color: var(--ink);
+	cursor: pointer;
+	transition: all 0.25s ease;
+}
+
+.site-search-toggle:hover {
+	background: var(--bg-secondary);
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.site-search-toggle svg {
+	width: 19px;
+	height: 19px;
 }

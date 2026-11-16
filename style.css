@@ -97,6 +97,34 @@ select,
 textarea {
 	min-height: 44px;
 	font: inherit;
+	background: var(--bg);
+	color: var(--ink);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	padding: 10px 14px;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: var(--ink-muted);
+}
+
+select {
+	cursor: pointer;
+}
+
+textarea {
+	resize: vertical;
+	min-height: 100px;
 }
 
 a {

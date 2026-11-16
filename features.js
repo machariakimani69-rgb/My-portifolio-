@@ -1144,7 +1144,7 @@ function addLocalPortfolioTools() {
 function addWelcomeAnimation() {
 	const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 	const shown = sessionStorage.getItem('portfolio-welcome-shown');
-	if (reduced || shown === 'true') return;
+	if (shown === 'true') return;
 
 	const overlay = document.createElement('div');
 	overlay.className = 'welcome-overlay';
@@ -1154,9 +1154,24 @@ function addWelcomeAnimation() {
 		<div class="welcome-content">
 			<h1>Welcome to <span>David Kimani's</span> Portfolio</h1>
 			<p>Explore projects, skills, and achievements</p>
+			<button class="welcome-dismiss" type="button">Continue</button>
 		</div>
 	`;
 	document.body.insertBefore(overlay, document.body.firstChild);
+
+	const dismissButton = overlay.querySelector('.welcome-dismiss');
+	dismissButton.addEventListener('click', () => {
+		overlay.classList.add('hidden');
+		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+		setTimeout(() => overlay.remove(), 600);
+	});
+
+	if (reduced) {
+		// Static welcome without animation when reduced motion is enabled
+		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+		setTimeout(() => overlay.remove(), 5000);
+		return;
+	}
 
 	const balloonContainer = overlay.querySelector('#welcomeBalloons');
 	const confettiContainer = overlay.querySelector('#welcomeConfetti');
