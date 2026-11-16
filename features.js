@@ -1143,8 +1143,6 @@ function addLocalPortfolioTools() {
 
 function addWelcomeAnimation() {
 	const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	const shown = sessionStorage.getItem('portfolio-welcome-shown');
-	if (shown === 'true') return;
 
 	const overlay = document.createElement('div');
 	overlay.className = 'welcome-overlay';
@@ -1167,11 +1165,17 @@ function addWelcomeAnimation() {
 	});
 
 	if (reduced) {
-		// Static welcome without animation when reduced motion is enabled
 		sessionStorage.setItem('portfolio-welcome-shown', 'true');
 		setTimeout(() => overlay.remove(), 5000);
 		return;
 	}
+
+	setTimeout(() => {
+		overlay.classList.add('hidden');
+		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+		setTimeout(() => overlay.remove(), 600);
+	}, 4500);
+}
 
 	const balloonContainer = overlay.querySelector('#welcomeBalloons');
 	const confettiContainer = overlay.querySelector('#welcomeConfetti');

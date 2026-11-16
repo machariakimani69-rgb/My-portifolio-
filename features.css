@@ -1014,7 +1014,7 @@ button:focus-visible {
 	animation: cursor-pulse 2s ease-in-out infinite;
 }
 
-@media (pointer: fine) and (min-width: 769px) {
+@media (min-width: 769px) {
 	.custom-cursor {
 		display: block;
 	}
