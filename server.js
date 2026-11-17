@@ -2361,7 +2361,13 @@ async function initializeApplication() {
     await database.initializeDatabase();
     await database.pruneExpiredSessions();
     const storedAdminPasswordHash = await database.getAdminPasswordHash();
-    if (storedAdminPasswordHash) {
+    if (configuredAdminPassword) {
+      // Environment variable takes precedence over any stored hash
+      ADMIN_PASSWORD_HASH = adminPasswordIsBcryptHash
+        ? configuredAdminPassword
+        : bcrypt.hashSync(configuredAdminPassword, 12);
+      await database.setAdminPasswordHash(ADMIN_PASSWORD_HASH);
+    } else if (storedAdminPasswordHash) {
       if (!bcryptHashPattern.test(storedAdminPasswordHash)) {
         throw new Error('The saved administrator credential is invalid.');
       }
