@@ -271,7 +271,7 @@ a {
 	display: grid;
 	min-height: 72px;
 	grid-template-columns: minmax(0, 1fr) auto auto auto;
-	grid-template-rows: 72px;
+	grid-template-rows: auto;
 	align-items: center;
 	column-gap: 12px;
 }
