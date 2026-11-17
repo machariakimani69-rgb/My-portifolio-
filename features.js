@@ -380,7 +380,7 @@ function addLiveVisitorBadge() {
 
 function addVisitorAccountLink() {
   const navigation = document.querySelector('#navLinks');
-  if (!navigation || navigation.querySelector('.visitor-account-link')) return;
+  if (!navigation || navigation.querySelector('a[href="account.html"]')) return;
   const link = document.createElement('a');
   link.className = 'visitor-account-link';
   link.href = 'account.html';

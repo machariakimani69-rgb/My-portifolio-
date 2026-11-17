@@ -623,7 +623,7 @@ button:focus-visible {
 	.nav {
 		min-height: 64px;
 		grid-template-columns: minmax(0, 1fr) auto auto auto;
-		grid-template-rows: 64px;
+		grid-template-rows: auto;
 	}
 
 	.brand {
@@ -650,12 +650,15 @@ button:focus-visible {
 		background: var(--bg);
 		color: var(--ink);
 		box-shadow: none;
+		align-self: stretch;
+		max-height: none;
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 	}
 
 	.nav-links.open {
 		display: grid;
+		height: calc(100vh - 64px);
 	}
 
 	.nav-links a {

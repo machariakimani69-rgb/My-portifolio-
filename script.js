@@ -4,14 +4,6 @@ const menuButton = document.querySelector('#menuToggle');
 const navigation = document.querySelector('#navLinks');
 const navigationLinks = [...document.querySelectorAll('#navLinks a[data-page]')];
 
-const readSavedTheme = () => {
-	try {
-		return localStorage.getItem('portfolio-theme');
-	} catch {
-		return null;
-	}
-};
-
 const applyTheme = (theme, savePreference = false) => {
 	const selectedTheme = theme === 'dark' ? 'dark' : 'light';
 	const isDark = selectedTheme === 'dark';
@@ -33,7 +25,7 @@ const applyTheme = (theme, savePreference = false) => {
 	}
 };
 
-applyTheme(readSavedTheme() || document.documentElement?.dataset.defaultTheme || 'dark');
+applyTheme((() => { try { return localStorage.getItem('portfolio-theme'); } catch { return null; } })() || document.documentElement?.dataset.defaultTheme || 'dark');
 
 if (themeButton) {
 	themeButton.addEventListener('click', () => {

@@ -731,12 +731,15 @@ button:focus-visible {
 		background: var(--bg);
 		color: var(--ink);
 		box-shadow: none;
+		align-self: stretch;
+		max-height: none;
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 	}
 
 	.nav-links.open {
 		display: grid;
+		height: calc(100vh - 64px);
 	}
 
 	.nav-links a {
