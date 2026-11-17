@@ -365,3 +365,21 @@ document.querySelectorAll('.reveal-on-scroll').forEach((el) => revealObserver.ob
 navigationLinks.forEach((link) => {
 	link.addEventListener('click', () => setMenuOpen(false));
 });
+
+/* ===== Welcome Celebration Overlay ===== */
+const welcomeOverlay = document.querySelector('#welcomeOverlay');
+const welcomeClose = document.querySelector('#welcomeClose');
+const welcomeCloseBtn = document.querySelector('#welcomeCloseBtn');
+
+if (welcomeOverlay) {
+	const closeWelcome = () => {
+		welcomeOverlay.classList.add('hidden');
+	};
+
+	if (welcomeClose) {
+		welcomeClose.addEventListener('click', closeWelcome);
+	}
+	if (welcomeCloseBtn) {
+		welcomeCloseBtn.addEventListener('click', closeWelcome);
+	}
+}

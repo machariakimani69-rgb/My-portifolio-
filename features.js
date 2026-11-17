@@ -918,7 +918,7 @@ function addLocalPortfolioTools() {
         document.documentElement.style.setProperty('--green', appearance.accentColor);
         document.documentElement.dataset.defaultTheme = appearance.defaultTheme === 'dark' ? 'dark' : 'light';
       }
-      if (!readSavedTheme()) {
+      if (!((() => { try { return localStorage.getItem('portfolio-theme'); } catch { return null; } })())) {
         document.documentElement.dataset.theme = (appearance?.defaultTheme === 'dark') ? 'dark' : 'light';
         const themeButton = document.querySelector('#themeToggle');
         if (themeButton) {

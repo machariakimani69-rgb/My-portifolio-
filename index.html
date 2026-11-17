@@ -41,6 +41,21 @@
     <link rel="stylesheet" href="features.css" />
   </head>
   <body>
+    <div class="welcome-overlay" id="welcomeOverlay">
+      <div class="welcome-card">
+        <button class="welcome-close" id="welcomeClose" type="button" aria-label="Close welcome">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <span class="welcome-icon">✨</span>
+        <div class="welcome-content">
+          <h2>Welcome to my portfolio</h2>
+          <p>I'm David Macharia Kimani — Software Engineering student at the University of Embu. Explore my work, skills, and projects below.</p>
+        </div>
+        <div class="welcome-actions">
+          <button class="btn btn-primary" id="welcomeCloseBtn" type="button">Get Started</button>
+        </div>
+      </div>
+    </div>
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="reading-progress" role="progressbar" aria-label="Page reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
     <header class="topbar">
