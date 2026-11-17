@@ -245,6 +245,28 @@ if (menuButton && navigation) {
 	});
 }
 
+const mediaQueryList = window.matchMedia('(max-width: 700px)');
+
+function placeNavLinks() {
+	if (!navigation || !menuButton) return;
+	const navContainer = document.querySelector('.nav');
+	const wantMobile = mediaQueryList.matches;
+	const alreadyInBody = navigation.parentElement === document.body;
+	if (wantMobile && !alreadyInBody) {
+		document.body.appendChild(navigation);
+	} else if (!wantMobile && alreadyInBody && navContainer) {
+		const brand = navContainer.querySelector('.brand');
+		if (brand) {
+			brand.after(navigation);
+		} else {
+			navContainer.prepend(navigation);
+		}
+	}
+}
+
+placeNavLinks();
+mediaQueryList.addEventListener('change', placeNavLinks);
+
 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 navigationLinks.forEach((link) => {
 	const isCurrentPage = link.dataset.page === currentPage;
