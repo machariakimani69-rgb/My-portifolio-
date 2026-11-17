@@ -1332,11 +1332,12 @@ button:focus-visible {
 @media (max-width: 700px) {
 	.assistant-panel {
 		width: calc(100vw - 32px);
+		max-width: none;
 		right: 16px;
 		left: 16px;
-		bottom: auto;
-		top: 80px;
-		transform: translateY(-16px);
+		bottom: 72px;
+		top: auto;
+		transform: translateY(16px);
 	}
 	.assistant-panel.open {
 		transform: translateY(0);
@@ -1348,16 +1349,6 @@ button:focus-visible {
 	.assistant-bubble svg {
 		width: 22px;
 		height: 22px;
-	}
-	.assistant-panel {
-		bottom: 72px;
-		right: 16px;
-		left: auto;
-		top: auto;
-		transform: translateY(16px);
-	}
-	.assistant-panel.open {
-		transform: translateY(0);
 	}
 }
 
@@ -1381,6 +1372,363 @@ button:focus-visible {
 		transition: none;
 	}
 }
+
+@media (max-width: 1024px) {
+	.focus-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.skills-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.projects-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.about-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 28px;
+	}
+
+	.athletics-section .about-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 28px;
+	}
+
+	.hero::before {
+		width: 520px;
+		height: 520px;
+	}
+
+	.hero::after {
+		width: 300px;
+		height: 300px;
+	}
+
+	.profile-engagement {
+		gap: 10px;
+		margin-top: 16px;
+	}
+
+	.profile-like-button,
+	.profile-follow-link {
+		min-height: 42px;
+		font-size: 0.84rem;
+	}
+}
+
+@media (max-width: 600px) and (min-width: 431px) {
+	.focus-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.stats {
+		grid-template-columns: 1fr;
+	}
+
+	.skills-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.projects-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.stats .stat strong {
+		font-size: 1.8rem;
+	}
+
+	.project-image {
+		min-height: 170px;
+	}
+
+	.project-body {
+		padding: 16px;
+	}
+}
+
+@media (max-width: 430px) and (min-width: 361px) {
+	.focus-item {
+		padding: 24px 16px;
+	}
+
+	.focus-item h3 {
+		font-size: 1rem;
+	}
+
+	.focus-item p {
+		font-size: 0.88rem;
+	}
+
+	.stat strong {
+		font-size: 1.6rem;
+	}
+
+	.stat p {
+		font-size: 0.82rem;
+	}
+
+	.skill-card {
+		padding: 16px 12px;
+	}
+
+	.skill-card h3 {
+		font-size: 1rem;
+	}
+
+	.skill-card p {
+		font-size: 0.82rem;
+	}
+
+	.skill-card svg {
+		width: 28px;
+		height: 28px;
+	}
+
+	.project-image {
+		min-height: 150px;
+	}
+
+	.project-body {
+		padding: 14px;
+	}
+
+	.project-meta h3 {
+		font-size: 1.1rem;
+	}
+
+	.project-body p {
+		font-size: 0.88rem;
+	}
+
+	.profile-like-button,
+	.profile-follow-link {
+		min-height: 40px;
+		padding: 7px 12px;
+		font-size: 0.82rem;
+		justify-content: center;
+		text-align: center;
+	}
+
+	.live-visitor-badge {
+		font-size: 0.78rem;
+		padding: 6px 12px;
+	}
+
+	.feature-image img {
+		height: 160px;
+	}
+
+	.photo-gallery-item img {
+		height: 160px;
+	}
+
+	.contact-links a {
+		font-size: 0.9rem;
+	}
+
+	.contact-links svg {
+		width: 16px;
+		height: 16px;
+	}
+}
+
+@media (max-width: 360px) {
+	.focus-item {
+		padding: 20px 14px;
+	}
+
+	.focus-item h3 {
+		font-size: 0.95rem;
+	}
+
+	.focus-item p {
+		font-size: 0.85rem;
+		max-width: none;
+	}
+
+	.stat strong {
+		font-size: 1.4rem;
+	}
+
+	.stat p {
+		font-size: 0.8rem;
+	}
+
+	.skill-card {
+		padding: 14px 10px;
+	}
+
+	.skill-card h3 {
+		font-size: 0.95rem;
+	}
+
+	.skill-card p {
+		font-size: 0.8rem;
+	}
+
+	.skill-card svg {
+		width: 26px;
+		height: 26px;
+	}
+
+	.project-image {
+		min-height: 130px;
+	}
+
+	.project-body {
+		padding: 12px;
+	}
+
+	.project-meta h3 {
+		font-size: 1.05rem;
+	}
+
+	.profile-like-button,
+	.profile-follow-link {
+		min-height: 40px;
+		padding: 7px 12px;
+		font-size: 0.8rem;
+	}
+
+	.live-visitor-badge {
+		font-size: 0.76rem;
+		padding: 6px 10px;
+	}
+
+	.feature-image img {
+		height: 140px;
+	}
+
+	.photo-gallery-item img {
+		height: 140px;
+	}
+
+	.contact-links a {
+		font-size: 0.88rem;
+	}
+
+	.assistant-bubble {
+		width: 44px;
+		height: 44px;
+	}
+
+	.assistant-bubble svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	.assistant-panel {
+		width: calc(100vw - 24px);
+		max-width: none;
+		right: 12px;
+		left: 12px;
+		bottom: 60px;
+	}
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+	.focus-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.stats {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.skills-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.projects-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.hero-visual {
+		max-width: 280px;
+		margin: 20px auto 0;
+	}
+
+	.profile-engagement {
+		flex-direction: row;
+		justify-content: center;
+		gap: 10px;
+	}
+}
+
+@media (max-width: 430px) and (orientation: landscape) {
+	.focus-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.skills-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.projects-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.hero-visual {
+		max-width: 200px;
+		margin: 16px auto 0;
+	}
+
+	.about-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 20px;
+	}
+
+	.profile-engagement {
+		gap: 8px;
+	}
+}
+
+@media (max-width: 360px) and (orientation: landscape) {
+	.focus-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.skills-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.projects-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.hero-visual {
+		max-width: 160px;
+		margin: 12px auto 0;
+	}
+
+	.about-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 16px;
+	}
+
+	.profile-engagement {
+		gap: 6px;
+	}
+
+	.stats .stat strong {
+		font-size: 1.5rem;
+	}
+}
+
 
 /* ---- Skip to content link ---- */
 .skip-link {

@@ -20,3 +20,15 @@ portifolio-backend/
 Mycoding/
 build-output.txt
 test-output.txt
+
+# Test infrastructure
+e2e/
+playwright.config.js
+test-results/
+test-screenshots/
+
+# Temporary diagnostic scripts
+check-db.js
+check-rate-limit.js
+reset-rate-limit.js
+test-register.js
