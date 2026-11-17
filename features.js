@@ -648,7 +648,7 @@ function addContactActions() {
     form.className = 'mailto-contact-form';
     form.innerHTML = `
       <h3>Send a message</h3>
-      <p>Your message is saved to the portfolio owner’s private inbox. Email delivery is not configured.</p>
+      <p>Your message is sent to the portfolio owner’s private inbox by email.</p>
       <div class="contact-form-grid">
         <label>Your name<input name="name" type="text" maxlength="100" autocomplete="name" required></label>
         <label>Your email<input name="email" type="email" maxlength="254" autocomplete="email" required></label>

@@ -89,6 +89,8 @@ const corsAllowedOrigins = new Set((process.env.CORS_ALLOWED_ORIGINS || '')
     }
     return parsed.origin;
   }));
+corsAllowedOrigins.add('https://david-portifolio-kdx3.onrender.com');
+corsAllowedOrigins.add('http://localhost:3000');
 
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   console.error('PORT must be an integer between 1 and 65535.');
@@ -443,6 +445,77 @@ async function sendPasswordResetEmail(email, resetToken, baseUrl) {
     console.error('Failed to send password reset email:', error);
     return false;
   }
+}
+
+async function sendContactEmail(name, email, subject, message, baseUrl) {
+  if (!RESEND_API_KEY || !EMAIL_FROM) {
+    console.error('Email sending is not configured: RESEND_API_KEY or EMAIL_FROM is missing.');
+    return false;
+  }
+
+  const html = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New contact message</title>
+  </head>
+  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #17251f; margin: 0; padding: 0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; margin: 40px auto; padding: 20px;">
+      <tr>
+        <td style="padding: 40px 30px; background: #ffffff; border-radius: 12px; border: 1px solid #d8e2da;">
+          <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #17251f;">New contact message</h1>
+          <p style="margin: 0 0 12px 0; font-size: 16px; color: #56675e;"><strong>From:</strong> ${escapeHtml(name)}</p>
+          <p style="margin: 0 0 12px 0; font-size: 16px; color: #56675e;"><strong>Email:</strong> ${escapeHtml(email)}</p>
+          <p style="margin: 0 0 12px 0; font-size: 16px; color: #56675e;"><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+          <div style="margin: 24px 0 0 0; padding: 20px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; font-size: 15px; color: #334155; white-space: pre-wrap;">${escapeHtml(message)}</p>
+          </div>
+          <p style="margin: 30px 0 0 0; font-size: 14px; color: #64748b;">
+            Reply directly to ${escapeHtml(email)} to respond to this message.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: [EMAIL_FROM],
+        subject: `Portfolio contact: ${subject}`,
+        html,
+        reply_to: email,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      console.error('Resend contact email error:', response.status, errorBody);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to send contact email:', error);
+    return false;
+  }
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function matchesAdminRecoveryKey(suppliedKey) {
@@ -1412,7 +1485,7 @@ async function handleRequest(request, response) {
       if (pathname === '/api/community/comment') {
         const pageKey = typeof payload?.pageKey === 'string' ? payload.pageKey : '';
         const message = typeof payload?.message === 'string' ? payload.message.trim() : '';
-        if (!['projects.html', 'contact.html'].includes(pageKey) || message.length < 2 || message.length > 1000) {
+        if (!['projects.html', 'contact.html', 'index.html'].includes(pageKey) || message.length < 2 || message.length > 1000) {
           return sendJson(response, 400, { error: 'Choose a portfolio page and enter a comment of 2–1000 characters.' });
         }
         await database.addComment({
@@ -1460,7 +1533,19 @@ async function handleRequest(request, response) {
       const submission = validateContactMessage(payload, session.account, true);
       if (submission.error) return sendJson(response, 400, { error: submission.error });
       await database.addContactMessage(submission.message);
-      return sendJson(response, 201, { submitted: true, delivery: 'local-inbox' });
+      let emailSent = false;
+      try {
+        emailSent = await sendContactEmail(
+          submission.message.displayName,
+          submission.message.email,
+          submission.message.message.split('\n')[0].replace(/^Subject:\s*/, '') || 'Contact message',
+          submission.message.message,
+          EMAIL_BASE_URL || `http://${HOST}:${PORT}`,
+        );
+      } catch {
+        // Email delivery failed but message is preserved in the database
+      }
+      return sendJson(response, 201, { submitted: true, delivery: emailSent ? 'email' : 'local-inbox' });
     } catch (error) {
       if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
         return sendJson(response, 400, { error: error.message });
