@@ -1416,6 +1416,7 @@ button:focus-visible {
 		width: 100%;
 		padding: 14px 12px;
 		font-size: 0.95rem;
+		color: var(--primary);
 	}
 
 	.nav-links a:hover,
