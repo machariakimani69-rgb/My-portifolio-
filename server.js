@@ -525,6 +525,7 @@ async function callAiApi(messages) {
   const apiKey = process.env.AI_API_KEY;
   const apiUrl = process.env.AI_API_URL || 'https://api.openai.com/v1/chat/completions';
   if (!apiKey) {
+    console.warn('AI_API_KEY is not set; AI assistant will return unconfigured message.');
     return {
       reply: 'The AI assistant is not yet configured. Please contact the site owner to set up AI API credentials.',
       provider: 'none',
