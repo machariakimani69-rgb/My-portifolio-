@@ -384,6 +384,63 @@ async function initializeDatabase() {
       appearance: { accentColor: '#236653', defaultTheme: 'light' },
     }),
   ]);
+  await run(`
+    CREATE TABLE IF NOT EXISTS ai_knowledge_items (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      category TEXT NOT NULL,
+      content TEXT NOT NULL,
+      visible INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+  await run('CREATE INDEX IF NOT EXISTS idx_ai_knowledge_category ON ai_knowledge_items (category, visible)');
+  await run(`INSERT OR IGNORE INTO ai_knowledge_items (id, title, category, content, visible, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+    crypto.randomUUID(),
+    'David Kimani - Personal Introduction',
+    'personal',
+    'David Macharia Kimani is a Computer Science student at the University of Embu, expected to graduate in 2028. He is passionate about software development, web technologies, and building practical solutions that help people.',
+    1,
+    new Date().toISOString(),
+    new Date().toISOString(),
+  ]);
+  await run(`INSERT OR IGNORE INTO ai_knowledge_items (id, title, category, content, visible, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+    crypto.randomUUID(),
+    'Education - University of Embu',
+    'education',
+    'David is pursuing a Bachelor of Science in Computer Science at the University of Embu, enrolled September 2024, expected graduation 2028.',
+    1,
+    new Date().toISOString(),
+    new Date().toISOString(),
+  ]);
+  await run(`INSERT OR IGNORE INTO ai_knowledge_items (id, title, category, content, visible, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+    crypto.randomUUID(),
+    'Technical Skills',
+    'skills',
+    'David works with HTML, CSS, JavaScript, and Node.js for web development. He builds responsive, accessible interfaces and backend services.',
+    1,
+    new Date().toISOString(),
+    new Date().toISOString(),
+  ]);
+  await run(`INSERT OR IGNORE INTO ai_knowledge_items (id, title, category, content, visible, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+    crypto.randomUUID(),
+    'Athletics - Running',
+    'athletics',
+    'David is a 3000m runner with a personal best of 9:56.81, balancing athletics with university studies.',
+    1,
+    new Date().toISOString(),
+    new Date().toISOString(),
+  ]);
+  await run(`INSERT OR IGNORE INTO ai_knowledge_items (id, title, category, content, visible, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+    crypto.randomUUID(),
+    'Contact Information',
+    'contact',
+    'Visitors can reach David through the contact form on the portfolio website or via WhatsApp.',
+    1,
+    new Date().toISOString(),
+    new Date().toISOString(),
+  ]);
 }
 
 async function createVisitorSession(tokenHash, accountId, expiresAt) {
@@ -1249,5 +1306,47 @@ module.exports = {
   revokeAnalyticsVisitor,
   pruneAnalytics,
   getAnalyticsSnapshot,
+  listAiKnowledgeItems,
+  getAiKnowledgeItem,
+  addAiKnowledgeItem,
+  updateAiKnowledgeItem,
+  deleteAiKnowledgeItem,
   db,
 };
+
+async function listAiKnowledgeItems() {
+  return all(
+    'SELECT id, title, category, content, visible, created_at AS createdAt, updated_at AS updatedAt FROM ai_knowledge_items ORDER BY category, title',
+  );
+}
+
+async function getAiKnowledgeItem(id) {
+  const row = await get('SELECT id, title, category, content, visible, created_at AS createdAt, updated_at AS updatedAt FROM ai_knowledge_items WHERE id = ?', [id]);
+  return row || null;
+}
+
+async function addAiKnowledgeItem(item) {
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  await run(
+    `INSERT INTO ai_knowledge_items (id, title, category, content, visible, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, item.title, item.category, item.content, item.visible ? 1 : 0, now, now],
+  );
+  return { id, ...item, createdAt: now, updatedAt: now };
+}
+
+async function updateAiKnowledgeItem(id, item) {
+  const now = new Date().toISOString();
+  await run(
+    `UPDATE ai_knowledge_items SET title = ?, category = ?, content = ?, visible = ?, updated_at = ? WHERE id = ?`,
+    [item.title, item.category, item.content, item.visible ? 1 : 0, now, id],
+  );
+  const row = await get('SELECT id, title, category, content, visible, created_at AS createdAt, updated_at AS updatedAt FROM ai_knowledge_items WHERE id = ?', [id]);
+  return row || null;
+}
+
+async function deleteAiKnowledgeItem(id) {
+  const result = await run('DELETE FROM ai_knowledge_items WHERE id = ?', [id]);
+  return result.changes === 1;
+}

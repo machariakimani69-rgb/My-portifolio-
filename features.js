@@ -1417,101 +1417,173 @@ function addAchievementCounters() {
 }
 
 function addPortfolioAssistant() {
-	const assistantKey = 'portfolio-assistant-dismissed';
-	if (sessionStorage.getItem(assistantKey) === 'true') return;
+	const toggle = document.querySelector('#aiToggle');
+	const chat = document.querySelector('#aiChat');
+	const closeBtn = document.querySelector('#aiClose');
+	const messages = document.querySelector('#aiMessages');
+	const input = document.querySelector('#aiTextInput');
+	const sendBtn = document.querySelector('#aiSendButton');
+	const voiceBtn = document.querySelector('#aiVoiceButton');
+	const suggestions = document.querySelector('#aiSuggestions');
 
-	const panel = document.createElement('div');
-	panel.className = 'portfolio-assistant';
-	panel.innerHTML = `
-		<button class="assistant-bubble" aria-label="Open portfolio assistant" title="Portfolio Assistant">
-			<svg viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 4.477 2 12 2z"/><path d="M12 16l-4-4m0 0l4-4m-4 4l4-4"/></svg>
-		</button>
-		<div class="assistant-panel">
-			<div class="assistant-header">
-				<h3>Portfolio Assistant</h3>
-				<button class="assistant-close" aria-label="Close assistant">×</button>
-			</div>
-			<div class="assistant-messages" id="assistantMessages">
-				<div class="assistant-message assistant">
-					Hi! I can answer questions about David's education, skills, projects, and certificates. What would you like to know?
-				</div>
-			</div>
-			<div class="assistant-input-area">
-				<input type="text" placeholder="Ask about David's portfolio..." autocomplete="off">
-				<button type="button">Ask</button>
-			</div>
-			<div class="assistant-hint">I answer based on public portfolio information only.</div>
-		</div>
-	`;
-
-	document.body.appendChild(panel);
-
-	const bubble = panel.querySelector('.assistant-bubble');
-	const panelEl = panel.querySelector('.assistant-panel');
-	const closeBtn = panel.querySelector('.assistant-close');
-	const messages = panel.querySelector('#assistantMessages');
-	const input = panel.querySelector('input');
-	const askBtn = panel.querySelector('button[type="button"]');
+	if (!toggle || !chat || !messages || !input || !sendBtn) return;
 
 	let isOpen = false;
+	let recognition = null;
+	let isListening = false;
 
-	bubble.addEventListener('click', () => {
+	if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+		recognition = new SpeechRecognition();
+		recognition.continuous = false;
+		recognition.interimResults = false;
+		recognition.lang = 'en-US';
+
+		recognition.onstart = () => {
+			isListening = true;
+			voiceBtn.classList.add('listening');
+			voiceBtn.setAttribute('aria-pressed', 'true');
+		};
+
+		recognition.onend = () => {
+			isListening = false;
+			voiceBtn.classList.remove('listening');
+			voiceBtn.setAttribute('aria-pressed', 'false');
+		};
+
+		recognition.onerror = (e) => {
+			console.warn('Speech recognition error:', e.error);
+			isListening = false;
+			voiceBtn.classList.remove('listening');
+			voiceBtn.setAttribute('aria-pressed', 'false');
+		};
+
+		recognition.onresult = (e) => {
+			const transcript = Array.from(e.results)
+				.map((r) => r[0].transcript)
+				.join('');
+			input.value = transcript;
+		};
+	}
+
+	const addMessage = (text, type, meta) => {
+		const div = document.createElement('div');
+		div.className = `ai-message ${type}`;
+		const content = document.createElement('div');
+		content.className = 'ai-message-content';
+		const p = document.createElement('p');
+		p.className = 'ai-message-text';
+		p.textContent = text;
+		content.appendChild(p);
+		if (meta) {
+			const metaDiv = document.createElement('div');
+			metaDiv.className = 'ai-message-meta';
+			metaDiv.innerHTML = `<span>${meta.time || ''}</span><span>${meta.role || ''}</span>`;
+			content.appendChild(metaDiv);
+		}
+		div.appendChild(content);
+		messages.appendChild(div);
+		messages.scrollTop = messages.scrollHeight;
+		return div;
+	};
+
+	const showTyping = () => {
+		const typing = document.createElement('div');
+		typing.className = 'ai-typing';
+		typing.innerHTML = '<span></span><span></span><span></span>';
+		messages.appendChild(typing);
+		messages.scrollTop = messages.scrollHeight;
+		return typing;
+	};
+
+	const hideTyping = (el) => {
+		if (el && el.parentNode) el.parentNode.removeChild(el);
+	};
+
+	const handleNavigation = (navAction) => {
+		if (!navAction || !navAction.page) return;
+		if (navAction.page.startsWith('http')) {
+			window.open(navAction.page, '_blank', 'noopener,noreferrer');
+		} else {
+			window.location.href = navAction.page;
+		}
+	};
+
+	const sendMessage = async (text) => {
+		if (!text.trim()) return;
+		addMessage(text, 'user', { role: 'You' });
+		input.value = '';
+
+		const typingEl = showTyping();
+		try {
+			const response = await window.portfolioApiFetch('/api/ai/chat', {
+				method: 'POST',
+				body: JSON.stringify({ message: text }),
+			});
+			hideTyping(typingEl);
+
+			if (!response.ok) {
+				addMessage('I am temporarily unable to respond. Please try again later.', 'ai', { role: 'Assistant' });
+				return;
+			}
+
+			const data = await response.json();
+			addMessage(data.reply || 'I am not sure how to respond.', 'ai', { role: 'Assistant', time: 'Just now' });
+
+			if (data.navigation) {
+				setTimeout(() => handleNavigation(data.navigation), 800);
+			}
+		} catch (error) {
+			hideTyping(typingEl);
+			console.error('AI chat error:', error);
+			addMessage('I am temporarily unable to respond. Please check your connection.', 'ai', { role: 'Assistant' });
+		}
+	};
+
+	toggle.addEventListener('click', () => {
 		isOpen = !isOpen;
-		panelEl.classList.toggle('open', isOpen);
+		chat.classList.toggle('open', isOpen);
 		if (isOpen) input.focus();
 	});
 
 	closeBtn.addEventListener('click', () => {
 		isOpen = false;
-		panelEl.classList.remove('open');
-		sessionStorage.setItem(assistantKey, 'true');
+		chat.classList.remove('open');
 	});
 
-	const addMessage = (text, type) => {
-		const div = document.createElement('div');
-		div.className = `assistant-message ${type}`;
-		div.textContent = text;
-		messages.appendChild(div);
-		messages.scrollTop = messages.scrollHeight;
-	};
+	sendBtn.addEventListener('click', () => {
+		sendMessage(input.value.trim());
+	});
 
-	const answerQuestion = (question) => {
-		const q = question.toLowerCase();
-		const portfolio = window.portfolioData || {};
-		const skills = portfolio.skills || ['HTML', 'CSS', 'JavaScript', 'Responsive Design', 'UI/UX Basics', 'Git & GitHub', 'Web Development'];
-		const projects = portfolio.projects || ['Portfolio Website', 'Business Landing Page', 'Task Manager App'];
-		const education = portfolio.education || [{ degree: 'BSc in Computer Science', school: 'University of Embu', years: '2024-2028' }];
-		const certificates = portfolio.certificates || [];
+	input.addEventListener('keypress', (e) => {
+		if (e.key === 'Enter') sendMessage(input.value.trim());
+	});
 
-		if (q.includes('skill') || q.includes('html') || q.includes('css') || q.includes('javascript') || q.includes('python') || q.includes('github')) {
-			addMessage(`David's skills include: ${skills.join(', ')}.`, 'assistant');
-		} else if (q.includes('project')) {
-			addMessage(`David's projects include: ${projects.join(', ')}.`, 'assistant');
-		} else if (q.includes('education') || q.includes('university') || q.includes('school') || q.includes('degree')) {
-			addMessage(`David is pursuing ${education[0]?.degree || 'BSc in Computer Science'} at ${education[0]?.school || 'University of Embu'} (${education[0]?.years || '2024-2028'}).`, 'assistant');
-		} else if (q.includes('certificate') || q.includes('badge')) {
-			if (certificates.length) {
-				addMessage(`Certificates: ${certificates.map(c => c.title).join(', ')}.`, 'assistant');
-			} else {
-				addMessage('Certificate information will appear here when available.', 'assistant');
-			}
-		} else if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
-			addMessage('Hello! I can help with questions about David\'s education, skills, projects, and certificates.', 'assistant');
-		} else {
-			addMessage('I can answer questions about David\'s education, skills, projects, and certificates. Try asking about his skills, education, or projects!', 'assistant');
+	voiceBtn.addEventListener('click', () => {
+		if (!recognition) {
+			addMessage('Voice input is not supported in this browser.', 'ai', { role: 'Assistant' });
+			return;
 		}
-	};
+		if (isListening) {
+			recognition.stop();
+			return;
+		}
+		try {
+			recognition.start();
+		} catch (e) {
+			console.warn('Voice start failed:', e);
+		}
+	});
 
-	const handleAsk = () => {
-		const text = input.value.trim();
-		if (!text) return;
-		addMessage(text, 'user');
-		input.value = '';
-		setTimeout(() => answerQuestion(text), 400);
-	};
+	suggestions.querySelectorAll('.ai-suggestion').forEach((btn) => {
+		btn.addEventListener('click', () => {
+			sendMessage(btn.textContent.trim());
+		});
+	});
 
-	askBtn.addEventListener('click', handleAsk);
-	input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAsk(); });
+	input.addEventListener('input', () => {
+		sendBtn.disabled = !input.value.trim();
+	});
 }
 
 function addTestimonials() {

@@ -444,6 +444,47 @@
 
     <div class="feature-toast" id="featureToast" role="status" aria-live="polite"></div>
 
+    <div class="ai-assistant">
+      <button class="ai-toggle" id="aiToggle" type="button" aria-label="Open AI assistant" title="AI Assistant">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3v7a3 3 0 0 0 3-3v-7a3 3 0 0 0 3-3v-7a3 3 0 0 0-3-3z"></path><line x1="12" y1="17" x2="12" y2="23"></line><line x1="12" y1="1" x2="12" y2="3"></line></svg>
+      </button>
+
+      <div class="ai-chat" id="aiChat" role="dialog" aria-modal="true" aria-label="AI Assistant">
+        <div class="ai-chat-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--primary);"></div>
+            <h3>David Kimani AI Assistant</h3>
+          </div>
+          <button class="ai-close" id="aiClose" type="button" aria-label="Close assistant"><i data-lucide="x" aria-hidden="true"></i></button>
+        </div>
+        <div class="ai-messages" id="aiMessages">
+          <div class="ai-message ai">
+            <div class="ai-message-content">
+              <p class="ai-message-text">Hi! I'm David Kimani's AI assistant. Ask me about his background, skills, projects, certifications, athletics, or how to contact him.</p>
+              <div class="ai-message-meta"><span>Just now</span><span>AI</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-suggestions" id="aiSuggestions">
+          <button class="ai-suggestion" type="button">Who is David Kimani?</button>
+          <button class="ai-suggestion" type="button">What does David study?</button>
+          <button class="ai-suggestion" type="button">Show me his projects</button>
+          <button class="ai-suggestion" type="button">What certificates has he earned?</button>
+          <button class="ai-suggestion" type="button">Tell me about his athletics</button>
+          <button class="ai-suggestion" type="button">How can I contact him?</button>
+        </div>
+        <div class="ai-input-area">
+          <input class="ai-text-input" id="aiTextInput" type="text" placeholder="Ask David's AI assistant…" autocomplete="off" />
+          <button class="ai-voice-button" id="aiVoiceButton" type="button" aria-label="Voice input" title="Voice input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+          </button>
+          <button class="ai-send-button" id="aiSendButton" type="button" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 22 9 22 2"></polygon></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="portfolio-api-config.js" defer></script>
     <script src="portfolio-api.js" defer></script>
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>

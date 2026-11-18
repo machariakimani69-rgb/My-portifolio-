@@ -518,6 +518,93 @@ function escapeHtml(text) {
     .replace(/'/g, '&#039;');
 }
 
+const AI_SYSTEM_PROMPT = "You are David Kimani AI Assistant, representing David Macharia Kimani. Purpose: Help visitors understand David Kimani background, skills, education, achievements and professional interests. Knowledge base: Use ONLY the provided knowledge items. Never invent qualifications, experience, awards or certificates. If information is unavailable, admit it honestly. Privacy: Never disclose private personal information, passwords, API keys or administrator information. Tone: Professional, natural, helpful, concise. Capabilities: Answer questions about David Kimani background, education, skills, projects, certifications, athletics, and contact information. Navigation: When asked about projects, skills, certificates, CV, contact, about, GitHub, or live demos, suggest relevant navigation actions. Language: Respond in the same language as the visitor message when possible, defaulting to English.";
+
+
+async function callAiApi(messages) {
+  const apiKey = process.env.AI_API_KEY;
+  const apiUrl = process.env.AI_API_URL || 'https://api.openai.com/v1/chat/completions';
+  if (!apiKey) {
+    return {
+      reply: 'The AI assistant is not yet configured. Please contact the site owner to set up AI API credentials.',
+      provider: 'none',
+      model: null,
+    };
+  }
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + apiKey,
+      },
+      body: JSON.stringify({
+        model: process.env.AI_MODEL || 'gpt-3.5-turbo',
+        messages: messages,
+        temperature: 0.3,
+        max_tokens: 500,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      console.error('AI API error:', response.status, errorBody);
+      return {
+        reply: 'I am temporarily unable to respond. Please try again later or contact David directly.',
+        provider: 'error',
+        model: null,
+      };
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    return {
+      reply: text.trim() || 'I am not sure how to respond to that.',
+      provider: 'configured',
+      model: data.model || process.env.AI_MODEL || 'gpt-3.5-turbo',
+    };
+  } catch (error) {
+    console.error('AI API call failed:', error);
+    return {
+      reply: 'I am temporarily unable to respond. Please try again later or contact David directly.',
+      provider: 'error',
+      model: null,
+    };
+  }
+}
+
+
+function buildAiContext(knowledgeItems) {
+  const visibleItems = knowledgeItems.filter((item) => item.visible);
+  if (visibleItems.length === 0) {
+    return 'No knowledge base items are currently available.';
+  }
+  return visibleItems.map((item) => '[' + item.category + '] ' + item.title + ': ' + item.content).join('\n\n');
+}
+
+
+function detectNavigationIntent(message) {
+  const lower = message.toLowerCase();
+  const navMap = [
+    { keywords: ['project', 'projects'], page: 'projects.html', label: 'Projects' },
+    { keywords: ['skill', 'skills', 'programming', 'technology'], page: 'skills.html', label: 'Skills' },
+    { keywords: ['certificate', 'certificates', 'badge', 'certification'], page: 'projects.html', label: 'Projects' },
+    { keywords: ['cv', 'resume', 'curriculum'], page: 'projects.html', label: 'Projects' },
+    { keywords: ['contact', 'email', 'whatsapp', 'message', 'reach'], page: 'contact.html', label: 'Contact' },
+    { keywords: ['about', 'who is', 'background'], page: 'about.html', label: 'About' },
+    { keywords: ['github', 'repository', 'repo', 'code'], page: 'projects.html', label: 'Projects' },
+    { keywords: ['live demo', 'live project', 'demo'], page: 'projects.html', label: 'Projects' },
+  ];
+  for (const item of navMap) {
+    if (item.keywords.some((kw) => lower.includes(kw))) {
+      return { page: item.page, label: item.label };
+    }
+  }
+  return null;
+}
+
+
 function matchesAdminRecoveryKey(suppliedKey) {
   if (!ADMIN_RECOVERY_KEY || typeof suppliedKey !== 'string' || Buffer.byteLength(suppliedKey, 'utf8') > 256) {
     return false;
@@ -2405,6 +2492,129 @@ async function handleRequest(request, response) {
 
     return sendJson(response, 404, { error: 'Not found.' });
   }
+    if (request.method === 'GET' && pathname === '/api/admin/ai/knowledge') {
+      if (!await hasValidSession(request)) {
+        return sendJson(response, 401, { error: 'Sign in to continue.' });
+      }
+      try {
+        const items = await database.listAiKnowledgeItems();
+        return sendJson(response, 200, { items });
+      } catch (error) {
+        console.error('AI knowledge list failed:', error);
+        return sendJson(response, 500, { error: 'Knowledge items could not be loaded.' });
+      }
+    }
+
+    if (request.method === 'POST' && pathname === '/api/admin/ai/knowledge') {
+      if (!await hasValidSession(request)) {
+        return sendJson(response, 401, { error: 'Sign in to continue.' });
+      }
+      try {
+        const payload = await readJson(request);
+        const title = typeof payload?.title === 'string' ? payload.title.trim() : '';
+        const category = typeof payload?.category === 'string' ? payload.category.trim() : '';
+        const content = typeof payload?.content === 'string' ? payload.content.trim() : '';
+        const visible = typeof payload?.visible === 'boolean' ? payload.visible : true;
+        if (!title || title.length > 200) return sendJson(response, 400, { error: 'Title is required (max 200 chars).' });
+        if (!category || category.length > 50) return sendJson(response, 400, { error: 'Category is required (max 50 chars).' });
+        if (!content || content.length > 5000) return sendJson(response, 400, { error: 'Content is required (max 5000 chars).' });
+        const item = await database.addAiKnowledgeItem({ title, category, content, visible });
+        await database.recordAdminAudit('ai_knowledge_added');
+        return sendJson(response, 201, { item });
+      } catch (error) {
+        if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
+          return sendJson(response, 400, { error: error.message });
+        }
+        console.error('AI knowledge add failed:', error);
+        return sendJson(response, 500, { error: 'Knowledge item could not be added.' });
+      }
+    }
+
+    if (request.method === 'PUT' && pathname.match(/\^\/api\/admin\/ai\/knowledge\/([0-9a-f-]{36})$/i)) {
+      if (!await hasValidSession(request)) {
+        return sendJson(response, 401, { error: 'Sign in to continue.' });
+      }
+      try {
+        const payload = await readJson(request);
+        const id = pathname.match(/\^\/api\/admin\/ai\/knowledge\/([0-9a-f-]{36})$/i)[1];
+        const existing = await database.getAiKnowledgeItem(id);
+        if (!existing) return sendJson(response, 404, { error: 'Knowledge item not found.' });
+        const title = typeof payload?.title === 'string' ? payload.title.trim() : existing.title;
+        const category = typeof payload?.category === 'string' ? payload.category.trim() : existing.category;
+        const content = typeof payload?.content === 'string' ? payload.content.trim() : existing.content;
+        const visible = typeof payload?.visible === 'boolean' ? payload.visible : existing.visible;
+        if (!title || title.length > 200) return sendJson(response, 400, { error: 'Title is required (max 200 chars).' });
+        if (!category || category.length > 50) return sendJson(response, 400, { error: 'Category is required (max 50 chars).' });
+        if (!content || content.length > 5000) return sendJson(response, 400, { error: 'Content is required (max 5000 chars).' });
+        const item = await database.updateAiKnowledgeItem(id, { title, category, content, visible });
+        await database.recordAdminAudit('ai_knowledge_updated');
+        return sendJson(response, 200, { item });
+      } catch (error) {
+        if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
+          return sendJson(response, 400, { error: error.message });
+        }
+        console.error('AI knowledge update failed:', error);
+        return sendJson(response, 500, { error: 'Knowledge item could not be updated.' });
+      }
+    }
+
+    if (request.method === 'DELETE' && pathname.match(/\^\/api\/admin\/ai\/knowledge\/([0-9a-f-]{36})$/i)) {
+      if (!await hasValidSession(request)) {
+        return sendJson(response, 401, { error: 'Sign in to continue.' });
+      }
+      try {
+        const id = pathname.match(/\^\/api\/admin\/ai\/knowledge\/([0-9a-f-]{36})$/i)[1];
+        const deleted = await database.deleteAiKnowledgeItem(id);
+        if (!deleted) return sendJson(response, 404, { error: 'Knowledge item not found.' });
+        await database.recordAdminAudit('ai_knowledge_deleted');
+        return sendJson(response, 200, { deleted: true });
+      } catch (error) {
+        console.error('AI knowledge delete failed:', error);
+        return sendJson(response, 500, { error: 'Knowledge item could not be deleted.' });
+      }
+    }
+
+
+    if (request.method === 'POST' && pathname === '/api/ai/chat') {
+      if (!hasSameOrigin(request)) return sendJson(response, 403, { error: 'Request origin is not allowed.' });
+      try {
+        const session = await visitorSessionFromRequest(request);
+        if (!session) return sendJson(response, 401, { error: 'Sign in with a visitor account to use the assistant.' });
+        const payload = await readJson(request);
+        const message = typeof payload?.message === 'string' ? payload.message.trim() : '';
+        if (!message || message.length > 1000) {
+          return sendJson(response, 400, { error: 'Enter a message of 1-1000 characters.' });
+        }
+
+        const knowledgeItems = await database.listAiKnowledgeItems();
+        const context = buildAiContext(knowledgeItems);
+        const navIntent = detectNavigationIntent(message);
+
+        const systemPrompt = AI_SYSTEM_PROMPT + '\n\nKNOWLEDGE BASE:\n' + context + '\n\nIf the visitor is asking about navigation (projects, skills, certificates, CV, contact, about, GitHub), include a NAVIGATE: page=X label=Y line in your response.';
+
+        const aiResponse = await callAiApi([
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message },
+        ]);
+
+        const navAction = navIntent ? { page: navIntent.page, label: navIntent.label } : null;
+
+        return sendJson(response, 200, {
+          reply: aiResponse.reply,
+          provider: aiResponse.provider,
+          model: aiResponse.model,
+          navigation: navAction,
+        });
+      } catch (error) {
+        if (['Request body is too large.', 'Request body must be valid JSON.'].includes(error.message)) {
+          return sendJson(response, 400, { error: error.message });
+        }
+        console.error('AI chat failed:', error);
+        return sendJson(response, 500, { error: 'The assistant could not respond.' });
+      }
+    }
+
+
 
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return sendJson(response, 405, { error: 'Method not allowed.' }, { Allow: 'GET, HEAD' });

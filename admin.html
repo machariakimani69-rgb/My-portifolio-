@@ -93,6 +93,7 @@
             <p class="sidebar-label sidebar-group-label">PORTFOLIO</p>
             <button class="admin-tab" type="button" data-tab="profile"><i data-lucide="user-round" aria-hidden="true"></i>Profile</button>
             <button class="admin-tab" type="button" data-tab="focus"><i data-lucide="sparkles" aria-hidden="true"></i>Focus areas</button>
+            <button class="admin-tab" type="button" data-tab="knowledge"><i data-lucide="book-open" aria-hidden="true"></i>AI Knowledge</button>
             <button class="admin-tab" type="button" data-tab="education"><i data-lucide="graduation-cap" aria-hidden="true"></i>Education</button>
             <button class="admin-tab" type="button" data-tab="projects"><i data-lucide="folder-kanban" aria-hidden="true"></i>Projects</button>
             <button class="admin-tab" type="button" data-tab="contacts"><i data-lucide="contact-round" aria-hidden="true"></i>Social links</button>
@@ -192,6 +193,22 @@
               <div class="panel-intro"><h2>Contact links</h2><p>Manage email, social profiles, and messaging links.</p></div>
               <div class="repeat-list" id="contactsList"></div>
               <button class="button button-secondary" type="button" data-add="contacts"><i data-lucide="plus" aria-hidden="true"></i>Add contact link</button>
+            </section>
+
+            <section class="tab-panel" data-panel="knowledge" hidden>
+              <div class="panel-intro"><h2>AI Knowledge Management</h2><p>Manage the knowledge base that powers the AI assistant. Add, edit, or delete information the assistant uses to answer visitor questions.</p></div>
+              <div class="field-grid">
+                <label class="field-wide">Title<input id="knowledgeTitle" type="text" maxlength="200" placeholder="e.g., Education - University of Embu" required /></label>
+                <label>Category<input id="knowledgeCategory" type="text" maxlength="50" placeholder="e.g., education, skills, athletics" required /></label>
+                <label class="field-wide">Content<textarea id="knowledgeContent" rows="4" maxlength="5000" placeholder="Enter the information the AI should know..." required></textarea></label>
+                <label class="checkbox-field"><input id="knowledgeVisible" type="checkbox" checked />Visible to visitors</label>
+              </div>
+              <div class="knowledge-actions">
+                <button class="button button-primary" id="saveKnowledge" type="button"><i data-lucide="save" aria-hidden="true"></i>Save knowledge item</button>
+                <button class="button button-secondary" id="clearKnowledge" type="button"><i data-lucide="rotate-ccw" aria-hidden="true"></i>Clear form</button>
+              </div>
+              <p class="form-message" id="knowledgeMessage" role="status" aria-live="polite"></p>
+              <div class="knowledge-list" id="knowledgeList"></div>
             </section>
 
             <section class="tab-panel" data-panel="extensions" hidden>

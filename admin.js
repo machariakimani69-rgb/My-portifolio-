@@ -31,6 +31,7 @@ const sectionTitles = {
   extensions: 'Site tools',
   insights: 'Analytics',
   security: 'Security',
+  knowledge: 'AI Knowledge',
 };
 const activityLabels = {
   admin_login_failed: 'Failed administrator sign-in',
@@ -147,6 +148,7 @@ function setActiveTab(tabName) {
     window.clearInterval(analyticsRefreshTimer);
   }
   if (tabName === 'extensions') loadExtensions();
+  if (tabName === 'knowledge') loadKnowledge();
 }
 
 function formatDuration(seconds) {
@@ -1220,6 +1222,121 @@ async function initializeAdmin() {
   } catch (error) {
     setMessage(loginMessage, error.message);
   }
+}
+
+async function loadKnowledge() {
+  const list = document.querySelector('#knowledgeList');
+  const titleInput = document.querySelector('#knowledgeTitle');
+  const categoryInput = document.querySelector('#knowledgeCategory');
+  const contentInput = document.querySelector('#knowledgeContent');
+  const visibleInput = document.querySelector('#knowledgeVisible');
+  const message = document.querySelector('#knowledgeMessage');
+  const saveBtn = document.querySelector('#saveKnowledge');
+  const clearBtn = document.querySelector('#clearKnowledge');
+  let editingId = null;
+
+  try {
+    const res = await apiRequest('/api/admin/ai/knowledge', { method: 'GET' });
+    const items = res.items || [];
+    list.innerHTML = '';
+    items.forEach((item) => {
+      const li = document.createElement('li');
+      li.className = 'managed-list-item';
+      li.innerHTML = `
+        <div class="knowledge-item">
+          <div>
+            <strong>${escapeHtml(item.title)}</strong>
+            <span class="knowledge-category">${escapeHtml(item.category)}</span>
+            <span class="knowledge-visible">${item.visible ? 'Visible' : 'Hidden'}</span>
+          </div>
+          <p class="knowledge-content">${escapeHtml(item.content)}</p>
+          <div class="knowledge-actions">
+            <button class="icon-button edit-knowledge" data-id="${item.id}" title="Edit"><i data-lucide="edit-3" aria-hidden="true"></i></button>
+            <button class="icon-button delete-knowledge" data-id="${item.id}" title="Delete"><i data-lucide="trash-2" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+    renderIcons();
+  } catch (error) {
+    setMessage(message, error.message);
+  }
+
+  const clearForm = () => {
+    titleInput.value = '';
+    categoryInput.value = '';
+    contentInput.value = '';
+    visibleInput.checked = true;
+    editingId = null;
+    saveBtn.textContent = 'Save knowledge item';
+    setMessage(message, '');
+  };
+
+  clearBtn.addEventListener('click', clearForm);
+
+  list.addEventListener('click', async (event) => {
+    const editBtn = event.target.closest('.edit-knowledge');
+    const deleteBtn = event.target.closest('.delete-knowledge');
+    if (editBtn) {
+      const id = editBtn.dataset.id;
+      try {
+        const item = await apiRequest(`/api/admin/ai/knowledge/${id}`, { method: 'GET' });
+        titleInput.value = item.title;
+        categoryInput.value = item.category;
+        contentInput.value = item.content;
+        visibleInput.checked = item.visible;
+        editingId = id;
+        saveBtn.textContent = 'Update knowledge item';
+        titleInput.focus();
+      } catch (error) {
+        setMessage(message, error.message);
+      }
+    }
+    if (deleteBtn) {
+      const id = deleteBtn.dataset.id;
+      if (!window.confirm('Delete this knowledge item permanently?')) return;
+      try {
+        await apiRequest(`/api/admin/ai/knowledge/${id}`, { method: 'DELETE' });
+        await loadKnowledge();
+        setMessage(message, 'Knowledge item deleted.', true);
+      } catch (error) {
+        setMessage(message, error.message);
+      }
+    }
+  });
+
+  saveBtn.addEventListener('click', async () => {
+    const title = titleInput.value.trim();
+    const category = categoryInput.value.trim();
+    const content = contentInput.value.trim();
+    const visible = visibleInput.checked;
+    if (!title || !category || !content) {
+      setMessage(message, 'Title, category, and content are all required.');
+      return;
+    }
+    saveBtn.disabled = true;
+    try {
+      if (editingId) {
+        await apiRequest(`/api/admin/ai/knowledge/${editingId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ title, category, content, visible }),
+        });
+        setMessage(message, 'Knowledge item updated.', true);
+      } else {
+        await apiRequest('/api/admin/ai/knowledge', {
+          method: 'POST',
+          body: JSON.stringify({ title, category, content, visible }),
+        });
+        setMessage(message, 'Knowledge item saved.', true);
+      }
+      clearForm();
+      await loadKnowledge();
+    } catch (error) {
+      setMessage(message, error.message);
+      saveBtn.disabled = false;
+    }
+  });
 }
 
 initializeAdmin();
