@@ -651,7 +651,7 @@ function validatePortfolio(data) {
   if (!Array.isArray(data.skills) || data.skills.length > 30) return false;
   if (!data.skills.every((item) => typeof item === 'string' && item.length <= 80)) return false;
   if (!Array.isArray(data.focus) || data.focus.length > 12) return false;
-  if (!data.focus.every((item) => item && typeof item.title === 'string' && item.title.length <= 120 && typeof item.description === 'string' && item.description.length <= 600 && /^[a-z0-9-]{1,40}$/i.test(item.icon))) return false;
+  if (!data.focus.every((item) => item && typeof item.title === 'string' && item.title.length <= 120 && typeof item.description === 'string' && item.description.length <= 600 && /^[a-z0-9-]{1,40}$/i.test(item.icon) && typeof item.visible === 'boolean')) return false;
   if (!Array.isArray(data.education) || data.education.length > 12) return false;
   if (!data.education.every((item) => item && ['period', 'title', 'description'].every((key) => typeof item[key] === 'string' && item[key].length <= 500))) return false;
   if (!Array.isArray(data.projects) || data.projects.length > 20) return false;

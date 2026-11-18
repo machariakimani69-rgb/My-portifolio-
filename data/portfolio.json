@@ -21,17 +21,20 @@
     {
       "title": "Computer Science",
       "icon": "cpu",
-      "description": "Developing a strong foundation in programming, computational thinking, and practical problem-solving."
+      "description": "Developing a strong foundation in programming, computational thinking, and practical problem-solving.",
+      "visible": true
     },
     {
       "title": "Frontend Development",
       "icon": "panels-top-left",
-      "description": "Building responsive, accessible interfaces with HTML, CSS, and JavaScript."
+      "description": "Building responsive, accessible interfaces with HTML, CSS, and JavaScript.",
+      "visible": true
     },
     {
       "title": "Athletic Mindset",
       "icon": "activity",
-      "description": "Bringing discipline, consistency, and a drive to improve to both study and project work."
+      "description": "Bringing discipline, consistency, and a drive to improve to both study and project work.",
+      "visible": true
     }
   ],
   "education": [

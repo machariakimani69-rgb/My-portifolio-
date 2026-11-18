@@ -344,16 +344,17 @@
       </article>
     </template>
 
-    <template id="focusTemplate">
-      <article class="repeat-item">
-        <div class="repeat-item-heading"><span class="item-number"></span><button class="icon-button remove-item" type="button" aria-label="Remove focus area" title="Remove focus area"><i data-lucide="trash-2" aria-hidden="true"></i></button></div>
-        <div class="field-grid">
-          <label>Section title<input data-field="title" type="text" maxlength="120" required /></label>
-          <label>Lucide icon name<input data-field="icon" type="text" maxlength="40" placeholder="cpu, activity, panels-top-left" required /></label>
-          <label class="field-wide">Description<textarea data-field="description" rows="3" maxlength="600" required></textarea></label>
-        </div>
-      </article>
-    </template>
+<template id="focusTemplate">
+  <article class="repeat-item">
+    <div class="repeat-item-heading"><span class="item-number"></span><button class="icon-button remove-item" type="button" aria-label="Remove focus area" title="Remove focus area"><i data-lucide="trash-2" aria-hidden="true"></i></button></div>
+    <div class="field-grid">
+      <label>Section title<input data-field="title" type="text" maxlength="120" required /></label>
+      <label>Lucide icon name<input data-field="icon" type="text" maxlength="40" placeholder="cpu, activity, panels-top-left" required /></label>
+      <label class="field-wide">Description<textarea data-field="description" rows="3" maxlength="600" required></textarea></label>
+      <label class="checkbox-field"><input data-field="visible" type="checkbox" checked />Visible on portfolio</label>
+    </div>
+  </article>
+</template>
 
     <template id="projectsTemplate">
       <article class="repeat-item">

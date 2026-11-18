@@ -1144,35 +1144,41 @@ function addLocalPortfolioTools() {
 function addWelcomeAnimation() {
 	const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+	// Only show once per session
+	try {
+		if (sessionStorage.getItem('portfolio-welcome-shown') === 'true') return;
+	} catch {}
+
 	const overlay = document.createElement('div');
 	overlay.className = 'welcome-overlay';
 	overlay.innerHTML = `
 		<div class="balloons" id="welcomeBalloons"></div>
 		<div class="confetti" id="welcomeConfetti"></div>
 		<div class="welcome-content">
-			<h1>Welcome to <span>David Kimani's</span> Portfolio</h1>
+			<div class="welcome-icon">✨</div>
+			<h2>Welcome to <span>David Kimani's</span> Portfolio</h2>
 			<p>Explore projects, skills, and achievements</p>
-			<button class="welcome-dismiss" type="button">Continue</button>
 		</div>
+		<button class="welcome-close" id="welcomeClose" type="button" aria-label="Close welcome"><i data-lucide="x" aria-hidden="true"></i></button>
 	`;
 	document.body.insertBefore(overlay, document.body.firstChild);
 
-	const dismissButton = overlay.querySelector('.welcome-dismiss');
+	const dismissButton = overlay.querySelector('#welcomeClose');
 	dismissButton.addEventListener('click', () => {
 		overlay.classList.add('hidden');
-		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+		try { sessionStorage.setItem('portfolio-welcome-shown', 'true'); } catch {}
 		setTimeout(() => overlay.remove(), 600);
 	});
 
 	if (reduced) {
-		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+		try { sessionStorage.setItem('portfolio-welcome-shown', 'true'); } catch {}
 		setTimeout(() => overlay.remove(), 5000);
 		return;
 	}
 
 	setTimeout(() => {
 		overlay.classList.add('hidden');
-		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+		try { sessionStorage.setItem('portfolio-welcome-shown', 'true'); } catch {}
 		setTimeout(() => overlay.remove(), 600);
 	}, 4500);
 
@@ -1203,7 +1209,7 @@ function addWelcomeAnimation() {
 
 	setTimeout(() => {
 		overlay.classList.add('hidden');
-		sessionStorage.setItem('portfolio-welcome-shown', 'true');
+		try { sessionStorage.setItem('portfolio-welcome-shown', 'true'); } catch {}
 	}, 4500);
 
 	setTimeout(() => overlay.remove(), 5200);
