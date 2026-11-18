@@ -19,22 +19,28 @@ body {
 }
 
 button,
-input {
+input,
+select,
+textarea {
 	font: inherit;
 }
 
 button {
-	min-height: 44px;
+	min-height: 48px;
 	touch-action: manipulation;
+	cursor: pointer;
 }
 
 a {
 	color: inherit;
+	text-decoration: none;
 }
 
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
 	outline: 3px solid var(--primary);
 	outline-offset: 3px;
 }
@@ -57,6 +63,7 @@ input:focus-visible {
 	font-weight: 700;
 	text-decoration: none;
 	color: var(--ink);
+	margin-bottom: 8px;
 }
 
 .account-brand span {
@@ -64,51 +71,50 @@ input:focus-visible {
 }
 
 .account-card {
-	padding: clamp(24px, 6vw, 40px);
-	border: 1px solid var(--line);
+	padding: clamp(28px, 6vw, 44px);
+	border: 1px solid var(--line-strong);
 	border-radius: var(--radius-lg);
-	background: var(--panel);
+	background: var(--surface-raised);
 	box-shadow: 0 24px 60px var(--shadow-deep);
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 }
 
 .account-eyebrow {
-	margin: 0 0 8px;
+	margin: 0 0 10px;
 	color: var(--primary);
 	font-size: 0.75rem;
 	font-weight: 700;
-	letter-spacing: 0.07em;
+	letter-spacing: 0.08em;
 	text-transform: uppercase;
 }
 
 .account-card h1 {
-	margin: 0 0 8px;
+	margin: 0 0 10px;
 	font-family: "Space Grotesk", sans-serif;
-	font-size: clamp(1.8rem, 6vw, 2.25rem);
+	font-size: clamp(1.75rem, 6vw, 2.25rem);
 	line-height: 1.2;
 	color: var(--ink);
 }
 
 .account-intro {
-	margin: 0 0 20px;
-	color: var(--muted);
+	margin: 0 0 24px;
+	color: var(--ink-muted);
+	font-size: 0.95rem;
 }
 
 .account-tabs {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 8px;
-	margin: 24px 0 8px;
+	margin: 28px 0 12px;
 	padding: 4px;
 	border-radius: var(--radius-sm);
 	background: var(--bg-secondary);
+	border: 1px solid var(--line);
 }
 
-.account-tab,
-.account-submit,
-.account-secondary,
-.account-danger-button {
+.account-tab {
 	display: inline-flex;
 	min-height: 44px;
 	align-items: center;
@@ -122,11 +128,14 @@ input:focus-visible {
 	text-decoration: none;
 	cursor: pointer;
 	transition: all 0.2s ease;
+	color: var(--ink-muted);
+	background: transparent;
 }
 
-.account-tab {
-	background: transparent;
-	color: var(--muted);
+.account-tab:hover {
+	background: var(--bg-secondary);
+	color: var(--ink);
+	border-color: var(--primary);
 }
 
 .account-tab.active {
@@ -138,9 +147,10 @@ input:focus-visible {
 
 .account-message {
 	min-height: 24px;
-	margin: 8px 0 4px;
+	margin: 8px 0 12px;
 	color: var(--danger);
 	font-size: 0.88rem;
+	font-weight: 600;
 }
 
 .account-message.success {
@@ -149,57 +159,53 @@ input:focus-visible {
 
 .account-form {
 	display: grid;
-	gap: 16px;
+	gap: 18px;
 }
 
 .account-form > p {
 	margin: 0;
-	color: var(--muted);
+	color: var(--ink-muted);
 	font-size: 0.9rem;
-}
-
-.recovery-key-settings {
-	margin-top: 24px;
-	padding-top: 20px;
-	border-top: 1px solid var(--line);
-}
-
-.recovery-key-settings h2 {
-	margin: 0;
-	font-family: "Space Grotesk", sans-serif;
-	font-size: 1.15rem;
-	color: var(--ink);
 }
 
 .account-form > label:not(.privacy-consent) {
 	display: grid;
 	gap: 7px;
-	font-size: 0.88rem;
-	font-weight: 600;
+	font-size: 0.85rem;
+	font-weight: 700;
 	color: var(--ink);
+	letter-spacing: 0.01em;
 }
 
-.account-form input:not([type="checkbox"]) {
+.account-form input:not([type="checkbox"]),
+.account-form select {
 	width: 100%;
-	min-height: 44px;
+	min-height: 48px;
 	padding: 12px 16px;
 	border: 1px solid var(--line);
 	border-radius: var(--radius-sm);
-	background: var(--bg-secondary);
+	background: var(--bg);
 	color: var(--ink);
 	font: inherit;
 	font-size: 0.95rem;
-	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.account-form input:not([type="checkbox"]):focus {
+.account-form input:not([type="checkbox"]):focus,
+.account-form select:focus {
 	border-color: var(--primary);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
-	background-color: var(--bg);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent);
+	background-color: var(--bg-secondary);
+	outline: none;
+}
+
+.account-form input::placeholder {
+	color: var(--ink-muted);
+	opacity: 0.75;
 }
 
 .account-form input[type="checkbox"] {
-	margin-right: 8px;
+	margin: 0;
 	width: 18px;
 	height: 18px;
 	accent-color: var(--primary);
@@ -208,7 +214,7 @@ input:focus-visible {
 .privacy-consent {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	font-size: 0.85rem;
 	color: var(--ink-muted);
 }
@@ -218,11 +224,18 @@ input:focus-visible {
 }
 
 .account-submit {
+	width: 100%;
+	min-height: 50px;
+	padding: 12px 24px;
+	border: none;
+	border-radius: var(--radius-sm);
 	background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-	border-color: transparent;
 	color: #ffffff;
+	font: inherit;
+	font-size: 1rem;
 	font-weight: 700;
 	box-shadow: 0 0 30px var(--primary-glow);
+	transition: all 0.2s ease;
 }
 
 .account-submit:hover {
@@ -230,21 +243,50 @@ input:focus-visible {
 	transform: translateY(-2px);
 }
 
+.account-submit:active {
+	transform: translateY(-1px);
+}
+
+.account-submit:disabled {
+	opacity: 0.65;
+	cursor: not-allowed;
+	transform: none;
+	box-shadow: 0 0 20px var(--primary-glow);
+}
+
 .account-secondary {
 	background: transparent;
+	border: 1px solid var(--line);
 	color: var(--ink);
 }
 
 .account-secondary:hover {
-	background: rgba(255, 255, 255, 0.05);
+	background: var(--bg-secondary);
 	border-color: var(--primary);
 	color: var(--primary);
 }
 
+.account-text-button {
+	background: transparent;
+	border: none;
+	color: var(--ink-muted);
+	font: inherit;
+	font-size: 0.9rem;
+	cursor: pointer;
+	text-align: left;
+	padding: 6px 0;
+	transition: color 0.2s ease;
+}
+
+.account-text-button:hover {
+	color: var(--primary);
+	text-decoration: underline;
+}
+
 .account-danger-button {
 	background: transparent;
+	border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--line));
 	color: var(--danger);
-	border-color: color-mix(in srgb, var(--danger) 30%, var(--line));
 }
 
 .account-danger-button:hover {
@@ -253,10 +295,55 @@ input:focus-visible {
 	color: var(--danger);
 }
 
+.account-notice {
+	margin-top: 28px;
+	padding: 16px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: var(--bg-secondary);
+}
+
+.account-notice strong {
+	display: block;
+	margin-bottom: 6px;
+	color: var(--ink);
+	font-size: 0.9rem;
+	font-weight: 700;
+}
+
+.account-notice p {
+	margin: 0;
+	color: var(--ink-muted);
+	font-size: 0.85rem;
+	line-height: 1.6;
+}
+
+.account-back-link,
+.account-admin-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 20px;
+	color: var(--ink-muted);
+	font-size: 0.9rem;
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+.account-back-link:hover,
+.account-admin-link:hover {
+	color: var(--primary);
+}
+
+.account-back-link:hover span,
+.account-admin-link:hover span {
+	text-decoration: underline;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 480px) {
 	body {
-		padding: 20px 12px;
+		padding: 16px 12px;
 	}
 
 	.account-shell {
@@ -265,5 +352,35 @@ input:focus-visible {
 
 	.account-card {
 		padding: 20px 16px;
+	}
+
+	.account-tabs {
+		margin: 24px 0 10px;
+	}
+
+	.account-notice {
+		margin-top: 20px;
+		padding: 14px;
+	}
+}
+
+@media (max-width: 360px) {
+	.account-card {
+		padding: 18px 14px;
+	}
+
+	.account-submit {
+		min-height: 44px;
+		font-size: 0.95rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
 	}
 }

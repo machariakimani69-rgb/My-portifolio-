@@ -1154,12 +1154,12 @@ function addWelcomeAnimation() {
 	overlay.innerHTML = `
 		<div class="balloons" id="welcomeBalloons"></div>
 		<div class="confetti" id="welcomeConfetti"></div>
-		<div class="welcome-content">
+		<div class="welcome-card">
 			<div class="welcome-icon">✨</div>
 			<h2>Welcome to <span>David Kimani's</span> Portfolio</h2>
 			<p>Explore projects, skills, and achievements</p>
+			<button class="welcome-close" id="welcomeClose" type="button" aria-label="Close welcome"><i data-lucide="x" aria-hidden="true"></i></button>
 		</div>
-		<button class="welcome-close" id="welcomeClose" type="button" aria-label="Close welcome"><i data-lucide="x" aria-hidden="true"></i></button>
 	`;
 	document.body.insertBefore(overlay, document.body.firstChild);
 
@@ -1180,7 +1180,7 @@ function addWelcomeAnimation() {
 		overlay.classList.add('hidden');
 		try { sessionStorage.setItem('portfolio-welcome-shown', 'true'); } catch {}
 		setTimeout(() => overlay.remove(), 600);
-	}, 4500);
+	}, 6000);
 
 	const balloonContainer = overlay.querySelector('#welcomeBalloons');
 	const confettiContainer = overlay.querySelector('#welcomeConfetti');
@@ -1210,9 +1210,9 @@ function addWelcomeAnimation() {
 	setTimeout(() => {
 		overlay.classList.add('hidden');
 		try { sessionStorage.setItem('portfolio-welcome-shown', 'true'); } catch {}
-	}, 4500);
+	}, 6000);
 
-	setTimeout(() => overlay.remove(), 5200);
+	setTimeout(() => overlay.remove(), 6600);
 }
 
 function addAnimatedIntroduction() {

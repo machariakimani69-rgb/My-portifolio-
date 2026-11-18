@@ -1406,6 +1406,7 @@ button:focus-visible {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	background: #050b14;
 	background: color-mix(in srgb, var(--navy) 92%, transparent);
 	backdrop-filter: blur(24px);
 	-webkit-backdrop-filter: blur(24px);
@@ -1418,8 +1419,10 @@ button:focus-visible {
 .welcome-card {
 	position: relative;
 	width: min(92vw, 420px);
+	max-width: 420px;
 	padding: 32px;
 	border-radius: var(--radius-lg);
+	background: #08101c;
 	background: color-mix(in srgb, var(--panel) 85%, transparent);
 	border: 1px solid var(--glass-border);
 	box-shadow: 0 30px 80px var(--shadow-deep);
